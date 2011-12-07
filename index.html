@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <title>OpenTabs</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <base href="http://data.melvin.me/ot/">
+
+    <!--[if lt IE 9]>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="stylesheets/base.css">
+    <link rel="stylesheet" href="stylesheets/skeleton.css">
+    <link rel="stylesheet" href="stylesheets/layout.css">
+
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+
+    <style>
+        .gold { background-color: #FFFF99 }
+    </style>
+
+</head>
+<body>
+
+
+    <div class="container">
+
+        <div class="sixteen columns">
+            <h1 class="remove-bottom" style="margin-top: 40px">OpenTabs</h1>
+
+            <h5>Version 0.1</h5>
+            <hr />
+        </div>
+        <div class="one-third column">
+
+          <ul class="tabs">
+            <!-- Give href an ID value of corresponding "tabs-content" <li>'s -->
+            <li><a class="active" href="#simple">My Tabs</a></li>
+
+            <li><a href="#lightweight">Send</a></li>
+            <li><a href="#mobileFriendly">Advanced</a></li>
+          </ul>
+
+          <ul class="tabs-content">     
+            <li id="simple" class="active">
+              <div id="opentabs">
+              
+              </div>
+            </li>
+
+            <li id="lightweight">
+              <form>
+                  <input size="20" type="text" id="payee" name="payee" value="testdummy@opentabs.net" />
+                  <input type="text" size="5" id="quantity" name="amount" value="1" />
+                  <input size="5" type="text" id="currency" name="currency" value="EUR" />
+                  <input type="button" value="Send" id="save" />
+              </form>
+            </li>
+            <li id="mobileFriendly">Advanced Settings coming soon.
+              <br/>
+
+              <form>
+                <button id="clearall">Clear All IOUs</button>
+              </form>
+            </li>
+          </ul>
+
+        </div>
+
+    </div>
+
+<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+<script src="javascripts/tabs.js"></script>
+<script src="opentabs.js"></script>
+<script>
+
+(function($) {
+  
+  var IOU = function() { this.load() };
+  IOU.prototype = {
+    
+    IOUs: [],
+  
+    load: function() {
+      this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
+      this.render();
+    },
+  
+    save: function() {
+      if( !this.confirm() ) {
+        alert('Operation Cancelled');
+        return;
+      }
+      
+      this.IOUs.push({
+        id: '',
+        IOU: {
+          payer: '<#me>',
+          payee: $('#payee').val(),
+          quantity: $('#quantity').val(),
+          currency: $('#currency').val(),
+          createdTime: new Date(),
+          description: 'a test IOU',
+          state: 0
+        }
+      });
+
+      window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
+      
+      window.location.reload();
+      //this.load();
+    },
+
+    confirm: function() {
+      var IOU = 'You are about to send:\n\n'+ $('#payee').val()
+      IOU += '\n\nan IOU for ' + $('#quantity').val() + ' ' + $("#currency").val();
+      IOU += '\n\nAre you sure?';
+      return confirm(IOU);
+    },
+
+    render: function() {
+      $('#opentabs').empty();
+      if(!this.IOUs.length) {
+        $('#opentabs').append( $('<p>').text('You don\'t currently have any open tabs.') );
+        return;
+      }
+      
+      var line = '<tr>' 
+        line += '<td>IOU&nbsp;</td>';
+        line += '<td class="gold">Amount&nbsp;</td>';
+        line += '<td>Currency</td>';
+        line += '</tr>';
+      $('#opentabs').append( $('<table>').append(line) );
+      
+      this.IOUs.forEach(function(item) {
+        if (item && item.IOU) {
+          var line = '<tr>' 
+          line += '<td>' + item.IOU.payee + '</td>';
+          line += '<td class="gold"> ' + (-1 * item.IOU.quantity) + '</td>';
+          line += '<td>' + item.IOU.currency + '</td>';
+          line += '</tr>';
+          if ( $('td:contains("'+ item.IOU.payee +'")').length > 0 ) {
+            var prev = $('td:contains("'+ item.IOU.payee +'")').next().html();
+            //alert('netting ' + prev);
+            $('td:contains("'+ item.IOU.payee +'")').next().html(1.0*prev + (-1 * item.IOU.quantity));
+          } else {
+            $('#opentabs table tr:last').after(line);
+          }
+        }
+      });
+      
+    },
+
+    clear: function() {
+      this.IOUs = window.localStorage.IOUs = null;
+      this.load();
+    }
+    
+  };
+  
+  $(document).ready(function() {
+    document.IOU = new IOU;
+    $('#clearall').click(function() { document.IOU.clear() });
+    $('#save').click(function() { document.IOU.save() });
+  });
+  
+})(jQuery);
+
+</script>
+
+</body>
+</html>
