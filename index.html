@@ -104,12 +104,13 @@
       this.IOUs.push({
         id: '',
         IOU: {
-          payer: '<#me>',
-          payee: $('#payee').val(),
-          quantity: $('#quantity').val(),
-          currency: $('#currency').val(),
-          createdTime: new Date(),
-          description: 'a test IOU',
+          "a": "com:Transfer",
+          "com:source": '<#me>',
+          "com:destination": $('#payee').val(),
+          "com:amount": $('#quantity').val(),
+          "com:currency": $('#currency').val(),
+          "dc:created": new Date(),
+          "rdfs:comment": 'a test IOU',
           state: 0
         }
       });
@@ -144,14 +145,13 @@
       this.IOUs.forEach(function(item) {
         if (item && item.IOU) {
           var line = '<tr>' 
-          line += '<td>' + item.IOU.payee + '</td>';
-          line += '<td class="gold"> ' + (-1 * item.IOU.quantity) + '</td>';
-          line += '<td>' + item.IOU.currency + '</td>';
+          line += '<td>' + item.IOU['com:destination'] + '</td>';
+          line += '<td class="gold"> ' + (-1 * item.IOU['com:amount']) + '</td>';
+          line += '<td>' + item.IOU['com:currency'] + '</td>';
           line += '</tr>';
-          if ( $('td:contains("'+ item.IOU.payee +'")').length > 0 ) {
-            var prev = $('td:contains("'+ item.IOU.payee +'")').next().html();
-            //alert('netting ' + prev);
-            $('td:contains("'+ item.IOU.payee +'")').next().html(1.0*prev + (-1 * item.IOU.quantity));
+          if ( $('td:contains("'+ item.IOU['com:destination'] +'")').length > 0 ) {
+            var prev = $('td:contains("'+ item.IOU['com:destination'] +'")').next().html();
+            $('td:contains("'+ item.IOU['com:destination'] +'")').next().html(1.0*prev + (-1 * item.IOU['com:amount']));
           } else {
             $('#opentabs table tr:last').after(line);
           }
