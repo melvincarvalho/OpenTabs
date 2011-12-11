@@ -126,11 +126,7 @@
 
       // PUT
       var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(this.IOUs)) +'" .';
-      //alert(body);
-      xhr = new XMLHttpRequest();
-      xhr.open('PUT', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
-      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
-      xhr.send(body);   
+      this.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
       //alert('http://opentabs.data.fm/d/' + hex_sha1(user) );
       
     },
@@ -159,11 +155,7 @@
 
         // PUT
         var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
-        //alert(body);
-        xhr = new XMLHttpRequest();
-        xhr.open('PUT', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
-        xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
-        xhr.send(body);   
+        that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
         //alert('PUT http://opentabs.data.fm/d/' + hex_sha1(user) );
         
         window.location.reload();
@@ -245,6 +237,13 @@
       xhr.open('DELETE', file, false);
       xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
       xhr.send(body);      
+    },
+    
+    putFile: function(file, data) {
+      xhr = new XMLHttpRequest();
+      xhr.open('PUT', file, false);
+      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.send(data);   
     },
     
     createIOU: function(source, destination, amount, currency) {
