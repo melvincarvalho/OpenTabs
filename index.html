@@ -107,19 +107,7 @@
       
       if (!this.IOUs) this.IOUs = [];
       
-      this.IOUs.push({
-        id: '',
-        IOU: {
-          "a": "com:Transfer",
-          "com:source": window.user,
-          "com:destination": $('#payee').val(),
-          "com:amount": $('#quantity').val(),
-          "com:currency": $('#currency').val(),
-          "dc:created": new Date(),
-          "rdfs:comment": 'a test IOU',
-          state: 0
-        }
-      });
+      this.IOUs.push(this.createIOU(window.user, $('#payee').val(), $('#quantity').val(), $('#currency').val()));
 
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
       this.saveRemote();
@@ -155,43 +143,19 @@
     syncRemote: function() {
       // get user
       var user = $('#payee').val();
+      var that = this;
 
       var sync = [];
 
       
-      sync.push({
-        id: '',
-        IOU: {
-          "a": "com:Transfer",
-          "com:source": $('#payee').val(),
-          "com:destination": window.user,
-          "com:amount": -1.0*$('#quantity').val(),
-          "com:currency": $('#currency').val(),
-          "dc:created": new Date(),
-          "rdfs:comment": 'a test IOU',
-          state: 0
-        }
-      });
-
+      IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
 
       $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
         //alert('GET http://opentabs.data.fm/d/' + hex_sha1(user) );
         var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
         if (!IOUs) IOUs = [];
         
-        IOUs.push({
-          id: '',
-          IOU: {
-            "a": "com:Transfer",
-            "com:source": $('#payee').val(),
-            "com:destination": window.user,
-            "com:amount": -1.0*$('#quantity').val(),
-            "com:currency": $('#currency').val(),
-            "dc:created": new Date(),
-            "rdfs:comment": 'a test IOU',
-            state: 0
-          }
-        });
+        IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
         
         // DELETE
         //alert('DELETE http://opentabs.data.fm/d/' + hex_sha1(user) );
@@ -282,6 +246,23 @@
       this.IOUs = window.localStorage.IOUs = null;
       this.saveRemote();
       this.load();
+    },
+    
+    createIOU: function(source, destination, amount, currency) {
+       var IOU = {
+        id: '',
+        IOU: {
+          "a": "com:Transfer",
+          "com:source": source,
+          "com:destination": destination,
+          "com:amount": amount,
+          "com:currency": currency,
+          "dc:created": new Date(),
+          "rdfs:comment": 'a test IOU',
+          state: 0
+        }
+      }    
+      return IOU;
     }
     
   };
