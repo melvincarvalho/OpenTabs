@@ -232,6 +232,15 @@
           }
         }
       });
+      
+      // beautify cells
+      $('td').each(function() { 
+          var html = $(this).html();
+          if ( html.substring(0,7) == 'mailto:' ) {
+            $(this).html(html.substring(7));
+          }
+        } 
+      );
 
       $('#welcome').html(window.user);
       
