@@ -31,13 +31,16 @@
 </head>
 <body>
 
+<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+<script>function user(data) { window.user = data; $('#welcome').val(data);  }</script>
+<script src="https://data.fm/user.js"></script>
 
     <div class="container">
 
         <div class="sixteen columns">
             <h1 class="remove-bottom" style="margin-top: 40px">Opentabs</h1>
 
-            <h5>Version 0.1</h5>
+            <h5 id="welcome"></h5>
             <hr />
         </div>
         <div class="one-third column">
@@ -78,8 +81,8 @@
 
     </div>
 
-<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
 <script src="javascripts/tabs.js"></script>
+<script src="javascripts/sha1.js"></script>
 <script src="opentabs.js"></script>
 <script>
 
@@ -91,21 +94,24 @@
     IOUs: [],
   
     load: function() {
-      this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
+      //this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
+      this.loadRemote();
       this.render();
     },
   
-    save: function() {
+    saveLocal: function() {
       if( !this.confirm() ) {
         alert('Operation Cancelled');
         return;
       }
       
+      if (!this.IOUs) this.IOUs = [];
+      
       this.IOUs.push({
         id: '',
         IOU: {
           "a": "com:Transfer",
-          "com:source": '<#me>',
+          "com:source": window.user,
           "com:destination": $('#payee').val(),
           "com:amount": $('#quantity').val(),
           "com:currency": $('#currency').val(),
@@ -116,10 +122,120 @@
       });
 
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
+      this.saveRemote();
+      this.syncRemote();
       
-      window.location.reload();
+      
       //this.load();
     },
+
+    saveRemote: function() {
+      // get user
+      var user = window.user;
+
+      // DELETE
+      var body = '';
+      xhr = new XMLHttpRequest();
+      xhr.open('DELETE', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
+      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.send(body);      
+      
+
+      // PUT
+      var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(this.IOUs)) +'" .';
+      //alert(body);
+      xhr = new XMLHttpRequest();
+      xhr.open('PUT', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
+      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.send(body);   
+      //alert('http://opentabs.data.fm/d/' + hex_sha1(user) );
+      
+    },
+
+    syncRemote: function() {
+      // get user
+      var user = $('#payee').val();
+
+      var sync = [];
+
+      
+      sync.push({
+        id: '',
+        IOU: {
+          "a": "com:Transfer",
+          "com:source": $('#payee').val(),
+          "com:destination": window.user,
+          "com:amount": -1.0*$('#quantity').val(),
+          "com:currency": $('#currency').val(),
+          "dc:created": new Date(),
+          "rdfs:comment": 'a test IOU',
+          state: 0
+        }
+      });
+
+
+      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
+        //alert('GET http://opentabs.data.fm/d/' + hex_sha1(user) );
+        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+        if (!IOUs) IOUs = [];
+        
+        IOUs.push({
+          id: '',
+          IOU: {
+            "a": "com:Transfer",
+            "com:source": $('#payee').val(),
+            "com:destination": window.user,
+            "com:amount": -1.0*$('#quantity').val(),
+            "com:currency": $('#currency').val(),
+            "dc:created": new Date(),
+            "rdfs:comment": 'a test IOU',
+            state: 0
+          }
+        });
+        
+        // DELETE
+        //alert('DELETE http://opentabs.data.fm/d/' + hex_sha1(user) );
+        var body = '';
+        xhr = new XMLHttpRequest();
+        xhr.open('DELETE', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
+        xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+        xhr.send(body);      
+      
+
+        // PUT
+        var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
+        //alert(body);
+        xhr = new XMLHttpRequest();
+        xhr.open('PUT', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
+        xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+        xhr.send(body);   
+        //alert('PUT http://opentabs.data.fm/d/' + hex_sha1(user) );
+        
+        window.location.reload();
+       
+      });
+      
+
+      
+    },
+
+    loadRemote: function() {
+      // get user
+      var user = window.user;
+      that = this;
+
+      
+      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
+        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+        //alert(JSON.stringify(IOUs));
+        that.IOUs = IOUs;
+        that.render();
+      });
+      
+      $('#welcome').html(window.user);
+      
+    },
+
 
     confirm: function() {
       var IOU = 'You are about to send:\n\n'+ $('#payee').val()
@@ -130,7 +246,7 @@
 
     render: function() {
       $('#opentabs').empty();
-      if(!this.IOUs.length) {
+      if(!this.IOUs || !this.IOUs.length) {
         $('#opentabs').append( $('<p>').text('You don\'t currently have any open tabs.') );
         return;
       }
@@ -157,11 +273,14 @@
           }
         }
       });
+
+      $('#welcome').html(window.user);
       
     },
 
     clear: function() {
       this.IOUs = window.localStorage.IOUs = null;
+      this.saveRemote();
       this.load();
     }
     
@@ -170,10 +289,12 @@
   $(document).ready(function() {
     document.IOU = new IOU;
     $('#clearall').click(function() { document.IOU.clear() });
-    $('#save').click(function() { document.IOU.save() });
+    $('#save').click(function() { document.IOU.saveLocal() });
   });
   
 })(jQuery);
+
+
 
 </script>
 
