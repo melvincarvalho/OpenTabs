@@ -136,22 +136,37 @@
       var user = $('#payee').val();
       var that = this;
 
-      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
-        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
-        if (!IOUs) IOUs = [];        
-        IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+      try {
+        $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
+          //alert(data);
+          var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+          if (!IOUs) IOUs = [];        
+          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
         
-        // DELETE
-        that.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));
+          // DELETE
+          that.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));
       
-        // PUT
-        var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
-        that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
+          // PUT
+          var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
+          that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
         
         
-        window.location.reload();
+          window.location.reload();
        
-      });
+        }).error(function () {
+          var IOUs = [];        
+          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+        
+          // PUT
+          var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
+          that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
+          
+          window.location.reload();
+          
+        });
+      } catch (err) {
+        alert('could not sync');
+      }
       
 
       
