@@ -122,12 +122,7 @@
       var user = window.user;
 
       // DELETE
-      var body = '';
-      xhr = new XMLHttpRequest();
-      xhr.open('DELETE', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
-      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
-      xhr.send(body);      
-      
+      this.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));      
 
       // PUT
       var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(this.IOUs)) +'" .';
@@ -148,22 +143,18 @@
       var sync = [];
 
       
-      IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+      this.IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
 
       $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
         //alert('GET http://opentabs.data.fm/d/' + hex_sha1(user) );
         var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
         if (!IOUs) IOUs = [];
         
-        IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+        that.IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
         
         // DELETE
         //alert('DELETE http://opentabs.data.fm/d/' + hex_sha1(user) );
-        var body = '';
-        xhr = new XMLHttpRequest();
-        xhr.open('DELETE', 'http://opentabs.data.fm/d/' + hex_sha1(user), false);
-        xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
-        xhr.send(body);      
+        that.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));
       
 
         // PUT
@@ -246,6 +237,14 @@
       this.IOUs = window.localStorage.IOUs = null;
       this.saveRemote();
       this.load();
+    },
+    
+    deleteFile: function(file) {
+      var body = '';
+      xhr = new XMLHttpRequest();
+      xhr.open('DELETE', file, false);
+      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.send(body);      
     },
     
     createIOU: function(source, destination, amount, currency) {
