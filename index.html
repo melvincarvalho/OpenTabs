@@ -136,27 +136,18 @@
       var user = $('#payee').val();
       var that = this;
 
-      var sync = [];
-
-      
-      this.IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
-
       $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
-        //alert('GET http://opentabs.data.fm/d/' + hex_sha1(user) );
         var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
-        if (!IOUs) IOUs = [];
-        
-        that.IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+        if (!IOUs) IOUs = [];        
+        IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
         
         // DELETE
-        //alert('DELETE http://opentabs.data.fm/d/' + hex_sha1(user) );
         that.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));
       
-
         // PUT
         var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
         that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
-        //alert('PUT http://opentabs.data.fm/d/' + hex_sha1(user) );
+        
         
         window.location.reload();
        
