@@ -259,12 +259,13 @@
     },
     
     createIOU: function(source, destination, amount, currency) {
+       
        var IOU = {
         id: '',
         IOU: {
           "a": "com:Transfer",
-          "com:source": source,
-          "com:destination": destination,
+          "com:source": this.makeURI(source),
+          "com:destination": this.makeURI(destination),
           "com:amount": amount,
           "com:currency": currency,
           "dc:created": new Date(),
@@ -273,6 +274,16 @@
         }
       }    
       return IOU;
+    },
+    
+    makeURI: function(id) {
+      if ( id.substring(0,7) == 'mailto:' ) {
+        return id;
+      } else if ( id.indexOf(':') != -1 ) {
+        return id;
+      } else {
+        return 'mailto:' + id;
+      }
     }
     
   };
