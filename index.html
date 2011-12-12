@@ -113,7 +113,7 @@
       
       if (!this.IOUs) this.IOUs = [];
       
-      this.IOUs.push(this.createIOU(window.user, $('#payee').val(), $('#quantity').val(), $('#currency').val()));
+      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val()));
 
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
       this.saveRemote();
@@ -139,7 +139,7 @@
 
     syncRemote: function() {
       // get user
-      var user = $('#payee').val();
+      var user = this.makeURI($('#payee').val());
       var that = this;
 
       try {
