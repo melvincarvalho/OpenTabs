@@ -75,10 +75,13 @@
                 <button id="clearall">Clear All IOUs</button>
               </form>
               <form action="https://data.fm/rp_auth">
-                Login <input type="submit" name="provider" value="Gmail" /><br/>
-                Login <input type="submit" name="provider" value="Yahoo" />
+                Login<br/><br/>
+                <input src="http://ealltd.com/images/gmail%20logo.jpg" onclick="$('#provider').val('Gmail'); " type="image" /><br/>
+                <input src="http://www.textually.org/textually/archives/archives/images/set2/yahologo.gif" onclick="$('#provider').val('Yahoo'); " type="image" /><br/>
+                <input type="hidden" name="next" value="http://opentabs.data.fm/" />
+                <input type="hidden" name="provider" value="Gmail" id="provider" />
               </form>
-              Login with WebID : <a href="https://data.fm/login"><img style="float: left" src="http://data.fm/common/images/loginWebID.png" /></a>
+              &nbsp;(WebID) <a href="https://data.fm/login"><img style="float: left" src="http://data.fm/common/images/loginWebID.png" /></a>
               
             </li>
           </ul>
@@ -279,6 +282,7 @@
           "com:currency": currency,
           "dc:created": new Date(),
           "rdfs:comment": 'a test IOU',
+          "format": '0.01',
           state: 0
         }
       }    
