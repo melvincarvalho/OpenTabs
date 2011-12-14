@@ -277,15 +277,15 @@
        var IOU = {
         id: '',
         IOU: {
-          "a": "com:Transfer",
+          "@context": "http://purl.org/opentabs",
+          "@type": "com:Transfer",
           "com:source": this.makeURI(source),
           "com:destination": this.makeURI(destination),
           "com:amount": amount,
           "com:currency": currency,
           "dc:created": new Date(),
           "rdfs:comment": 'a test IOU',
-          "format": '0.01',
-          state: 0
+          "ot:state": 0
         }
       }    
       return IOU;
