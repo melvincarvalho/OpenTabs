@@ -32,42 +32,6 @@
 <body>
 
 <script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-<script>
-function user(data) { window.user = data; $('#welcome').val(data);  }
-
-  function displayUser(user) {
-    var userName = document.getElementById('welcome');
-    var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
-    userName.innerHTML = 'Greetings, ' + user.name + '.';
-    window.user = 'https://graph.facebook.com/' + user.id;
-   }
-
-   function FBLogin() {
-     var appID = "119467988130777";
-     if (window.location.hash.length == 0) {
-       var path = 'https://www.facebook.com/dialog/oauth?';
-       var queryParams = ['client_id=' + appID,
-         'redirect_uri=' + window.location,
-         'response_type=token'];
-       var query = queryParams.join('&');
-       var url = path + query;
-       window.location = url;
-     } else {
-       var accessToken = window.location.hash.substring(1);
-       var path = "https://graph.facebook.com/me?";
-       var queryParams = [accessToken, 'callback=displayUser'];
-       var query = queryParams.join('&');
-       var url = path + query;
-
-       // use jsonp to call the graph
-       var script = document.createElement('script');
-       script.src = url;
-       document.body.appendChild(script);        
-     }
-   }
-
-</script>
-<script src="https://data.fm/user.js"></script>
 
     <header>
         <a href="https://github.com/melvincarvalho/OpenTabs" rel="doap:homepage"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://d3nwyuy0nl342s.cloudfront.net/img/71eeaab9d563c2b3c590319b398dd35683265e85/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub"></a>
@@ -118,7 +82,7 @@ function user(data) { window.user = data; $('#welcome').val(data);  }
               <a href="https://data.fm/login?provider=Gmail&next=http://opentabs.data.fm/"><img src="http://ealltd.com/images/gmail%20logo.jpg" /></a><br/><br/>
               <a href="https://data.fm/login?provider=Yahoo&next=http://opentabs.data.fm/"><img src="http://www.textually.org/textually/archives/archives/images/set2/yahologo.gif" /></a>
               
-              <br/><br/><a href="javascript:FBLogin()"><img src="http://www.getfitwatford.co.uk/images/stories/images/facebook_40.gif" /></a><br/><br/>
+              <br/><br/><a href="javascript:document.IOU.FBLogin()"><img src="http://www.getfitwatford.co.uk/images/stories/images/facebook_40.gif" /></a><br/><br/>
               
             </li>
           </ul>
@@ -139,10 +103,61 @@ function user(data) { window.user = data; $('#welcome').val(data);  }
     
     IOUs: [],
   
+    loadUser: function() {
+      //alert('load user');
+      if (window.location.hash.length == 0) {
+        var script = document.createElement('script');
+        script.src = 'https://data.fm/user.js?callback=document.IOU.displayUser';
+        document.body.appendChild(script);        
+      } else {
+        var accessToken = window.location.hash.substring(1);
+        var path = "https://graph.facebook.com/me?";
+        var queryParams = [accessToken, 'callback=document.IOU.displayUser'];
+        var query = queryParams.join('&');
+        var url = path + query;
+
+        // use jsonp to call the graph
+        var script = document.createElement('script');
+        script.src = url;
+        document.body.appendChild(script);        
+      }
+    },
+    
+    displayUser: function(user) {
+      var userName = document.getElementById('welcome');
+      if ( user.name ) {
+        var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
+        window.user = 'https://graph.facebook.com/' + user.id;
+        userName.innerHTML = 'Greetings, ' + window.user;
+      } else {
+        window.user = user; 
+        var userName = document.getElementById('welcome');
+        userName.innerHTML = 'User: ' + window.user;
+      }
+      this.loadRemote();
+    },
+
+    FBLogin: function() {
+      var appID = "119467988130777";
+      if (window.location.hash.length == 0) {
+        var path = 'https://www.facebook.com/dialog/oauth?';
+        var queryParams = ['client_id=' + appID,
+          'redirect_uri=' + window.location,
+          'response_type=token'];
+        var query = queryParams.join('&');
+        var url = path + query;
+        window.location = url;
+       } else {
+       }
+     },
+
+    
+    
     load: function() {
       //this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
-      this.loadRemote();
-      this.render();
+      this.loadUser();
+      //this.loadRemote();
+      //this.render();
     },
   
     saveLocal: function() {
@@ -221,6 +236,7 @@ function user(data) { window.user = data; $('#welcome').val(data);  }
     loadRemote: function() {
       // get user
       var user = window.user;
+      if (!user) return;
       that = this;
 
       
@@ -339,7 +355,7 @@ function user(data) { window.user = data; $('#welcome').val(data);  }
   };
   
   $(document).ready(function() {
-    document.IOU = new IOU;
+    document.IOU = new IOU; 
     $('#clearall').click(function() { document.IOU.clear() });
     $('#save').click(function() { document.IOU.saveLocal() });
   });
