@@ -39,19 +39,19 @@ function user(data) { window.user = data; $('#welcome').val(data);  }
     var userName = document.getElementById('welcome');
     var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
     userName.innerHTML = 'Greetings, ' + user.name + '.';
-    window.user = user.id;
+    window.user = 'https://graph.facebook.com/' + user.id;
    }
 
    function FBLogin() {
      var appID = "119467988130777";
      if (window.location.hash.length == 0) {
-     var path = 'https://www.facebook.com/dialog/oauth?';
-     var queryParams = ['client_id=' + appID,
-       'redirect_uri=' + window.location,
-       'response_type=token'];
-     var query = queryParams.join('&');
-     var url = path + query;
-     window.location = url;
+       var path = 'https://www.facebook.com/dialog/oauth?';
+       var queryParams = ['client_id=' + appID,
+         'redirect_uri=' + window.location,
+         'response_type=token'];
+       var query = queryParams.join('&');
+       var url = path + query;
+       window.location = url;
      } else {
        var accessToken = window.location.hash.substring(1);
        var path = "https://graph.facebook.com/me?";
