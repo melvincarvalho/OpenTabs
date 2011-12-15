@@ -128,7 +128,7 @@
       if ( user.name ) {
         var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
         window.user = 'https://graph.facebook.com/' + user.id;
-        userName.innerHTML = 'Greetings, ' + window.user;
+        userName.innerHTML = 'Greetings, ' + user.name;
       } else {
         window.user = user; 
         var userName = document.getElementById('welcome');
@@ -247,7 +247,7 @@
         that.render();
       });
       
-      $('#welcome').html(window.user);
+      //$('#welcome').html(window.user);
       
     },
 
@@ -298,7 +298,7 @@
         } 
       );
 
-      $('#welcome').html(window.user);
+      //$('#welcome').html(window.user);
       
     },
 
