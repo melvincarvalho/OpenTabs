@@ -32,7 +32,41 @@
 <body>
 
 <script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-<script>function user(data) { window.user = data; $('#welcome').val(data);  }</script>
+<script>
+function user(data) { window.user = data; $('#welcome').val(data);  }
+
+  function displayUser(user) {
+    var userName = document.getElementById('welcome');
+    var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
+    userName.innerHTML = 'Greetings, ' + user.name + '.';
+    window.user = user.id;
+   }
+
+   function FBLogin() {
+     var appID = "119467988130777";
+     if (window.location.hash.length == 0) {
+     var path = 'https://www.facebook.com/dialog/oauth?';
+     var queryParams = ['client_id=' + appID,
+       'redirect_uri=' + window.location,
+       'response_type=token'];
+     var query = queryParams.join('&');
+     var url = path + query;
+     window.location = url;
+     } else {
+       var accessToken = window.location.hash.substring(1);
+       var path = "https://graph.facebook.com/me?";
+       var queryParams = [accessToken, 'callback=displayUser'];
+       var query = queryParams.join('&');
+       var url = path + query;
+
+       // use jsonp to call the graph
+       var script = document.createElement('script');
+       script.src = url;
+       document.body.appendChild(script);        
+       }
+     }
+
+</script>
 <script src="https://data.fm/user.js"></script>
 
     <header>
@@ -84,6 +118,7 @@
               <a href="https://data.fm/login?provider=Gmail&next=http://opentabs.data.fm/"><img src="http://ealltd.com/images/gmail%20logo.jpg" /></a><br/><br/>
               <a href="https://data.fm/login?provider=Yahoo&next=http://opentabs.data.fm/"><img src="http://www.textually.org/textually/archives/archives/images/set2/yahologo.gif" /></a>
               
+              <br/><br/><a href="javascript:FBLogin()"><img src="http://www.getfitwatford.co.uk/images/stories/images/facebook_40.gif" /></a><br/><br/>
               
             </li>
           </ul>
