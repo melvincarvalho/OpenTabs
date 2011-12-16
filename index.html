@@ -64,7 +64,9 @@
 
             <li id="lightweight">
               <form>
-                  <input size="20" type="text" id="payee" name="payee" value="testdummy@opentabs.net" />
+                  <select name="payee" id="payee">
+                      <option value="testdummy@opentabs.net">Test Dummy</option>
+                  </select>              
                   <input type="text" size="5" id="quantity" name="amount" value="5" />
                   <input readonly="true" size="5" type="text" id="currency" name="currency" value="EUR" />
                   <input type="button" value="Send" id="save" />
@@ -102,6 +104,7 @@
   IOU.prototype = {
     
     IOUs: [],
+    friends: [],
   
     loadUser: function() {
       //alert('load user');
@@ -123,18 +126,43 @@
       }
     },
     
+    loadFriends: function() {
+      var accessToken = window.location.hash.substring(1);
+      var path = "https://graph.facebook.com/me/friends?";
+      var queryParams = [accessToken, 'callback=document.IOU.displayFriends'];
+      var query = queryParams.join('&');
+      var url = path + query;
+
+      // use jsonp to call the graph
+      var script = document.createElement('script');
+      script.src = url;
+      document.body.appendChild(script);        
+    },
+    
     displayUser: function(user) {
       var userName = document.getElementById('welcome');
       if ( user.name ) {
         var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
         window.user = 'https://graph.facebook.com/' + user.id;
         userName.innerHTML = 'Greetings, ' + user.name;
+        this.loadFriends();
       } else {
         window.user = user; 
         var userName = document.getElementById('welcome');
         userName.innerHTML = 'User: ' + window.user;
       }
       this.loadRemote();
+    },
+
+    displayFriends: function(data) {
+      var str;
+      for (i=0; i<data['data'].length; i++) {
+        var uri = 'https://graph.facebook.com/' + data['data'][i].id;
+        var n   = data['data'][i].name;
+        this.friends.push( { 'uri' : uri , 'name' : n } );
+         $("#payee").append("<option value="+ uri +">"+ n +"</option>");
+      }
+      this.beautify();
     },
 
     FBLogin: function() {
@@ -267,8 +295,8 @@
       }
       
       var line = '<tr>' 
-        line += '<td>IOU&nbsp;</td>';
-        line += '<td class="gold">Amount&nbsp;</td>';
+        line += '<td>IOU</td>';
+        line += '<td class="gold">Amount</td>';
         line += '<td>Currency</td>';
         line += '</tr>';
       $('#opentabs').append( $('<table>').append(line) );
@@ -289,17 +317,34 @@
         }
       });
       
+      this.beautify();
+      
+    },
+    
+    beautify: function() {
       // beautify cells
+      //alert('changing cells');
+      if ( !this.friends ) this.friends = [];
+      that = this;
       $('td').each(function() { 
-          var html = $(this).html();
-          if ( html.substring(0,7) == 'mailto:' ) {
-            $(this).html(html.substring(7));
+        var html = $(this).html();
+        var n;
+        //alert(JSON.stringify(that.friends));
+        for (i=0; i<that.friends.length; i++) {
+          if ( that.friends[i].uri == html) {
+            n = that.friends[i].name;
+            //alert(n);   
           }
-        } 
-      );
+        }
+          
+        if ( n ) {
+          $(this).html(n);
+        } else if ( html.substring(0,7) == 'mailto:' ) {
+          $(this).html(html.substring(7));
+        }
+      });
 
       //$('#welcome').html(window.user);
-      
     },
 
     clear: function() {
