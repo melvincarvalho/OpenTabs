@@ -86,6 +86,12 @@
               
               <br/><br/><a href="javascript:document.IOU.FBLogin()"><img src="http://www.getfitwatford.co.uk/images/stories/images/facebook_40.gif" /></a><br/><br/>
               
+              Add New Recipient<br/>
+              <form>
+                  Name: <input type="text" size="5" id="name" name="name" value="" />
+                  URI : <input size="5" type="text" id="uri" name="uri" value="" />
+                  <input type="button" value="Add" id="add" />
+              </form>
             </li>
           </ul>
 
@@ -163,6 +169,11 @@
          $("#payee").append("<option value="+ uri +">"+ n +"</option>");
       }
       this.beautify();
+    },
+
+    addRecipient: function() {
+      $("#payee").append("<option value="+ $('#uri').val() +">"+ $('#name').val() +"</option>");
+      alert($('#uri').val() + ' added!');
     },
 
     FBLogin: function() {
@@ -403,6 +414,7 @@
     document.IOU = new IOU; 
     $('#clearall').click(function() { document.IOU.clear() });
     $('#save').click(function() { document.IOU.saveLocal() });
+    $('#add').click(function() { document.IOU.addRecipient() });
   });
   
 })(jQuery);
