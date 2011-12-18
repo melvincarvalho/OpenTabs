@@ -112,12 +112,26 @@
     IOUs: [],
     friends: [],
   
+    // Starting point
+    load: function() {
+      //this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
+      if ( window.localStorage.friends ) {
+        this.friends = JSON.parse(window.localStorage.friends);
+        this.populateFriendsDropdown();
+      }
+      this.loadUser();
+      //this.loadRemote();
+      //this.render();
+    },
+    
+    // Load user details, callback to displayUser
     loadUser: function() {
-      //alert('load user');
+      // Non Facebook
       if (window.location.hash.length == 0) {
         var script = document.createElement('script');
         script.src = 'https://data.fm/user.js?callback=document.IOU.displayUser';
-        document.body.appendChild(script);        
+        document.body.appendChild(script);   
+      // Facebook     
       } else {
         var accessToken = window.location.hash.substring(1);
         var path = "https://graph.facebook.com/me?";
@@ -125,26 +139,13 @@
         var query = queryParams.join('&');
         var url = path + query;
 
-        // use jsonp to call the graph
         var script = document.createElement('script');
         script.src = url;
         document.body.appendChild(script);        
       }
     },
     
-    loadFriends: function() {
-      var accessToken = window.location.hash.substring(1);
-      var path = "https://graph.facebook.com/me/friends?";
-      var queryParams = [accessToken, 'callback=document.IOU.displayFriends'];
-      var query = queryParams.join('&');
-      var url = path + query;
-
-      // use jsonp to call the graph
-      var script = document.createElement('script');
-      script.src = url;
-      document.body.appendChild(script);        
-    },
-    
+    // callback to loadFriends
     displayUser: function(user) {
       var userName = document.getElementById('welcome');
       if ( user.name ) {
@@ -159,23 +160,72 @@
       }
       this.loadRemote();
     },
+    
+    // callback to displayFriends
+    loadFriends: function() {
+      var accessToken = window.location.hash.substring(1);
+      var path = "https://graph.facebook.com/me/friends?";
+      var queryParams = [accessToken, 'callback=document.IOU.displayFriends'];
+      var query = queryParams.join('&');
+      var url = path + query;
+
+      // use jsonp to call the graph
+      var script = document.createElement('script');
+      script.src = url;
+      document.body.appendChild(script);        
+    },    
 
     displayFriends: function(data) {
       var str;
       for (i=0; i<data['data'].length; i++) {
-        var uri = 'https://graph.facebook.com/' + data['data'][i].id;
-        var n   = data['data'][i].name;
-        this.friends.push( { 'uri' : uri , 'name' : n } );
-         $("#payee").append("<option value="+ uri +">"+ n +"</option>");
+        var uri  = 'https://graph.facebook.com/' + data['data'][i].id;
+        var name = data['data'][i].name;
+        this.addFriend( uri, name );
       }
+      this.populateFriendsDropdown();
       this.beautify();
     },
 
+    addFriend: function(uri, name) {
+      for (i=0; i<this.friends.length; i++) {
+        if ( uri == this.friends[i].uri && name == this.friends[i].name ) return;
+      }
+      
+      this.friends.push({ "uri" : uri, "name" : name });
+      window.localStorage.friends = JSON.stringify(this.friends);
+    },
+    
+    populateFriendsDropdown: function() {
+      // sort friends
+      this.friends = this.friends.sort(function(a,b) { 
+        if (a.name > b.name) { 
+          return 1;
+        } else { 
+          return -1; 
+        }
+      });
+      
+      $('#payee').children().remove().end();
+      
+      for (i=0; i<this.friends.length; i++) {
+        var uri  = this.friends[i].uri;
+        var name = this.friends[i].name;
+        $("#payee").append("<option value="+ uri +">"+ name +"</option>");
+      }
+    },      
+
+    // called from add button
     addRecipient: function() {
-      $("#payee").append("<option value="+ $('#uri').val() +">"+ $('#name').val() +"</option>");
-      alert($('#uri').val() + ' added!');
+      var uri  = this.makeURI($('#uri').val());
+      var name = $('#name').val();
+      
+      this.addFriend( uri , name );
+      this.populateFriendsDropdown();
+      
+      alert( uri + ' added!' );
     },
 
+    // called from fb button
     FBLogin: function() {
       var appID = "119467988130777";
       if (window.location.hash.length == 0) {
@@ -186,37 +236,28 @@
         var query = queryParams.join('&');
         var url = path + query;
         window.location = url;
-       } else {
-       }
-     },
-
-    
-    
-    load: function() {
-      //this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
-      this.loadUser();
-      //this.loadRemote();
-      //this.render();
-    },
-  
-    saveLocal: function() {
-      if( !this.confirm() ) {
-        alert('Operation Cancelled');
-        return;
+      } else {
       }
-      
-      if (!this.IOUs) this.IOUs = [];
-      
-      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val()));
-
-      window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
-      this.saveRemote();
-      this.syncRemote();
-      
-      
-      //this.load();
     },
 
+    loadRemote: function() {
+      // get user
+      var user = window.user;
+      if (!user) return;
+      that = this;
+
+      
+      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
+        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+        //alert(JSON.stringify(IOUs));
+        that.IOUs = IOUs;
+        that.render();
+      });
+      
+      //$('#welcome').html(window.user);
+      
+    },
+    
     saveRemote: function() {
       // get user
       var user = window.user;
@@ -268,36 +309,28 @@
         alert('could not sync');
       }
       
-
+    },
+    
+    saveLocal: function() {
+      if( !this.confirm() ) {
+        alert('Operation Cancelled');
+        return;
+      }
       
+      if (!this.IOUs) this.IOUs = [];
+      
+      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val()));
+
+      window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
+      this.saveRemote();
+      this.syncRemote();
+      
+      
+      //this.load();
     },
 
-    loadRemote: function() {
-      // get user
-      var user = window.user;
-      if (!user) return;
-      that = this;
 
-      
-      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
-        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
-        //alert(JSON.stringify(IOUs));
-        that.IOUs = IOUs;
-        that.render();
-      });
-      
-      //$('#welcome').html(window.user);
-      
-    },
-
-
-    confirm: function() {
-      var IOU = 'You are about to send:\n\n'+ $('#payee').val()
-      IOU += '\n\nan IOU for ' + $('#quantity').val() + ' ' + $("#currency").val();
-      IOU += '\n\nAre you sure?';
-      return confirm(IOU);
-    },
-
+    // render
     render: function() {
       $('#opentabs').empty();
       if(!this.IOUs || !this.IOUs.length) {
@@ -332,6 +365,14 @@
       
     },
     
+    // Helpers
+    confirm: function() {
+      var IOU = 'You are about to send:\n\n'+ $('#payee').val()
+      IOU += '\n\nan IOU for ' + $('#quantity').val() + ' ' + $("#currency").val();
+      IOU += '\n\nAre you sure?';
+      return confirm(IOU);
+    },
+
     beautify: function() {
       // beautify cells
       //alert('changing cells');
