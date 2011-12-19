@@ -339,6 +339,7 @@
 
     // render
     render: function() {
+      that = this;
       $('#opentabs').empty();
       if(!this.IOUs || !this.IOUs.length) {
         $('#opentabs').append( $('<p>').text('You don\'t currently have any open tabs.') );
@@ -356,7 +357,8 @@
         if (item && item.IOU) {
           var line = '<tr>' 
           var pm = ((-1 * item.IOU['com:amount'])<0)?'minus':'plus';
-          line += '<td>' + item.IOU['com:destination'] + '</td>';
+          var dest = item.IOU['com:destination'];
+          line += '<td title="'+ dest +'">' + dest + '</td>';
           line += '<td class="gold '+ pm +'"> ' + (-1 * item.IOU['com:amount']) + '</td>';
           line += '<td>' + item.IOU['com:currency'] + '</td>';
           line += '</tr>';
