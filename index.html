@@ -26,6 +26,7 @@
 
     <style>
         .gold  { background-color: #FFFF99 }
+        .blue  { background-color: #EEEEEE }
         .plus  { color: green }
         .minus { color: red }
     </style>
@@ -113,6 +114,7 @@
     
     IOUs: [],
     friends: [],
+    hide : true,
   
     // Starting point
     load: function() {
@@ -358,20 +360,26 @@
           var line = '<tr>' 
           var pm = ((-1 * item.IOU['com:amount'])<0)?'minus':'plus';
           var dest = item.IOU['com:destination'];
+          var created = item.IOU['dc:created'];
           line += '<td title="'+ dest +'">' + dest + '</td>';
-          line += '<td class="gold '+ pm +'"> ' + (-1 * item.IOU['com:amount']) + '</td>';
-          line += '<td>' + item.IOU['com:currency'] + '</td>';
+          line += '<td class="gold '+ pm +'">' + (-1 * item.IOU['com:amount']) + '</td>';
+          line += '<td title="'+ created +'"><a href="javascript:document.IOU.toggle()">' + item.IOU['com:currency'] + '</a></td>';
           line += '</tr>';
           if ( $('td:contains("'+ item.IOU['com:destination'] +'")').length > 0 ) {
-            var prev = $('td:contains("'+ item.IOU['com:destination'] +'")').next().html();
+            var prev = $('td:contains("'+ item.IOU['com:destination'] +'")').first().next().html();
             var sum = 1.0*prev + (-1 * item.IOU['com:amount']);
             pm = (sum<0)?'minus':'plus';
-            $('td:contains("'+ item.IOU['com:destination'] +'")').next().html(sum).removeClass('plus minus').addClass(pm);
+            var el = $('td:contains("'+ item.IOU['com:destination'] +'")').first();
+            el.next().html(sum).removeClass('plus minus').addClass(pm);
+            el.parent().after(line).next().addClass('blue').hide();
           } else {
             $('#opentabs table tr:last').after(line);
+            $('#opentabs table tr:last').after(line).next().addClass('blue').hide();
           }
         }
       });
+      
+      
       
       this.beautify();
       
@@ -383,6 +391,16 @@
       IOU += '\n\nan IOU for ' + $('#quantity').val() + ' ' + $("#currency").val();
       IOU += '\n\nAre you sure?';
       return confirm(IOU);
+    },
+
+    toggle: function() {
+      if ( this.hide ) {
+        $('.blue').show();
+      } else {
+        $('.blue').hide();
+      }
+      
+      this.hide = !this.hide;
     },
 
     beautify: function() {
