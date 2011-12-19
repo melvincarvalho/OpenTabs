@@ -25,7 +25,9 @@
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
 
     <style>
-        .gold { background-color: #FFFF99 }
+        .gold  { background-color: #FFFF99 }
+        .plus  { color: green }
+        .minus { color: red }
     </style>
 
 </head>
@@ -271,6 +273,11 @@
       //alert('http://opentabs.data.fm/d/' + hex_sha1(user) );
       
     },
+    
+    createDirectory: function(dir) {
+      // Use PUT instead of MKCOL
+      this.putFile('http://opentabs.data.fm/d/' + dir + '/', '');
+    },
 
     syncRemote: function() {
       // get user
@@ -348,13 +355,16 @@
       this.IOUs.forEach(function(item) {
         if (item && item.IOU) {
           var line = '<tr>' 
+          var pm = ((-1 * item.IOU['com:amount'])<0)?'minus':'plus';
           line += '<td>' + item.IOU['com:destination'] + '</td>';
-          line += '<td class="gold"> ' + (-1 * item.IOU['com:amount']) + '</td>';
+          line += '<td class="gold '+ pm +'"> ' + (-1 * item.IOU['com:amount']) + '</td>';
           line += '<td>' + item.IOU['com:currency'] + '</td>';
           line += '</tr>';
           if ( $('td:contains("'+ item.IOU['com:destination'] +'")').length > 0 ) {
             var prev = $('td:contains("'+ item.IOU['com:destination'] +'")').next().html();
-            $('td:contains("'+ item.IOU['com:destination'] +'")').next().html(1.0*prev + (-1 * item.IOU['com:amount']));
+            var sum = 1.0*prev + (-1 * item.IOU['com:amount']);
+            pm = (sum<0)?'minus':'plus';
+            $('td:contains("'+ item.IOU['com:destination'] +'")').next().html(sum).removeClass('plus minus').addClass(pm);
           } else {
             $('#opentabs table tr:last').after(line);
           }
@@ -451,6 +461,7 @@
     
   };
   
+  // Init
   $(document).ready(function() {
     document.IOU = new IOU; 
     $('#clearall').click(function() { document.IOU.clear() });
