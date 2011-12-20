@@ -26,7 +26,7 @@
 
     <style>
         .gold  { background-color: #FFFF99 }
-        .blue  { background-color: #EEEEEE }
+        .blue  { background-color: #EEEEFF }
         .plus  { color: green }
         .minus { color: red }
     </style>
@@ -70,8 +70,17 @@
                   <select name="payee" id="payee">
                       <option value="testdummy@opentabs.net">Test Dummy</option>
                   </select>              
-                  <input type="text" size="5" id="quantity" name="amount" value="5" />
-                  <input readonly="true" size="5" type="text" id="currency" name="currency" value="EUR" />
+                  <select name="amount" id="quantity">
+                      <option value="1">1</option>
+                      <option value="5">5</option>
+                      <option value="25">25</option>
+                      <option value="100">100</option>
+                      <option value="250">250</option>
+                      <option value="1000">1000</option>
+                  </select>              
+                  <select name="currency" id="currency">
+                      <option value="EUR">EUR</option>
+                  </select>              
                   <input type="button" value="Send" id="save" />
               </form>
             </li>
@@ -253,7 +262,7 @@
       
       $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
         var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
-        //alert(JSON.stringify(IOUs));
+
         that.IOUs = IOUs;
         that.render();
       });
