@@ -257,11 +257,15 @@
       // get user
       var user = window.user;
       if (!user) return;
-      that = this;
-
+      var userSha1 = hex_sha1(user);
       
-      $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
-        var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+      that = this;
+      
+      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
+      
+      
+      $.getJSON(baseDir + 'private/transfers.json' , function(data){
+        var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
 
         that.IOUs = IOUs;
         that.render();
@@ -274,40 +278,58 @@
     saveRemote: function() {
       // get user
       var user = window.user;
+      var userSha1 = hex_sha1(user);
+
+      // dirs
+      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
+      this.createDirectory(baseDir + 'public/');
+      this.createDirectory(baseDir + 'private/');
+      this.createDirectory(baseDir + 'friends/');
+
 
       // DELETE
-      this.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));      
+      this.deleteFile(baseDir + 'private/transfers');      
 
       // PUT
       var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(this.IOUs)) +'" .';
-      this.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
-      //alert('http://opentabs.data.fm/d/' + hex_sha1(user) );
+      this.putFile(baseDir + 'private/transfers', body);
+      
       
     },
     
     createDirectory: function(dir) {
-      // Use PUT instead of MKCOL
-      this.putFile('http://opentabs.data.fm/d/' + dir + '/', '');
+      var xhr = new XMLHttpRequest();
+      xhr.open('MKCOL', dir, false);
+      xhr.send();
     },
 
     syncRemote: function() {
       // get user
       var user = this.makeURI($('#payee').val());
+      var userSha1 = hex_sha1(user);
       var that = this;
 
+      // dirs
+      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
+      this.createDirectory(baseDir + 'public/');
+      this.createDirectory(baseDir + 'private/');
+      this.createDirectory(baseDir + 'friends/');
+
+
+
       try {
-        $.getJSON('http://opentabs.data.fm/d/'+ hex_sha1(user) +'.json' , function(data){
+        $.getJSON(baseDir + 'private/transfers' +'.json' , function(data){
           //alert(data);
-          var IOUs = JSON.parse(unescape(data['http://opentabs.data.fm/d/'+hex_sha1(user)]['http://opentabs.data.fm/d/'+hex_sha1(user)+'#IOUs'][0]['value']));
+          var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
           if (!IOUs) IOUs = [];        
           IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
         
           // DELETE
-          that.deleteFile('http://opentabs.data.fm/d/' + hex_sha1(user));
+          that.deleteFile(baseDir + 'private/transfers');
       
           // PUT
           var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
-          that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
+          that.putFile(baseDir + 'private/transfers', body);
         
         
           window.location.reload();
@@ -318,7 +340,7 @@
         
           // PUT
           var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
-          that.putFile('http://opentabs.data.fm/d/' + hex_sha1(user), body);
+          that.putFile(baseDir + 'private/transfers', body);
           
           window.location.reload();
           
