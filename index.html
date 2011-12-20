@@ -389,20 +389,25 @@
       $('#opentabs').append( $('<table>').append(line) );
       
       this.IOUs.forEach(function(item) {
-        if (item && item.IOU) {
+        if (item) {
+          var source = item['http://payswarm.com/vocabs/commerce#source']['@id'];
+          var dest = item['http://payswarm.com/vocabs/commerce#destination']['@id'];
+          var amount = item['http://payswarm.com/vocabs/commerce#amount'];
+          var curr = item['http://payswarm.com/vocabs/commerce#currency'];
+          var created = item['http://purl.org/dc/terms/created'];
+          var comment = item['http://www.w3.org/2000/01/rdf-schema#comment'];
           var line = '<tr>' 
-          var pm = ((-1 * item.IOU['com:amount'])<0)?'minus':'plus';
-          var dest = item.IOU['com:destination'];
-          var created = item.IOU['dc:created'];
+          var pm = ((-1 * amount)<0)?'minus':'plus';
+          
           line += '<td title="'+ dest +'">' + dest + '</td>';
-          line += '<td class="gold '+ pm +'">' + (-1 * item.IOU['com:amount']) + '</td>';
-          line += '<td title="'+ created +'"><a href="javascript:document.IOU.toggle()">' + item.IOU['com:currency'] + '</a></td>';
+          line += '<td title="'+ comment +'" class="gold '+ pm +'">' + (-1 * amount) + '</td>';
+          line += '<td title="'+ created +'"><a href="javascript:document.IOU.toggle()">' + curr + '</a></td>';
           line += '</tr>';
-          if ( $('td:contains("'+ item.IOU['com:destination'] +'")').length > 0 ) {
-            var prev = $('td:contains("'+ item.IOU['com:destination'] +'")').first().next().html();
-            var sum = 1.0*prev + (-1 * item.IOU['com:amount']);
+          if ( $('td:contains("'+ dest +'")').length > 0 ) {
+            var prev = $('td:contains("'+ dest +'")').first().next().html();
+            var sum = 1.0*prev + (-1 * amount );
             pm = (sum<0)?'minus':'plus';
-            var el = $('td:contains("'+ item.IOU['com:destination'] +'")').first();
+            var el = $('td:contains("'+ dest +'")').first();
             el.next().html(sum).removeClass('plus minus').addClass(pm);
             el.parent().after(line).next().addClass('blue').hide();
           } else {
@@ -486,19 +491,22 @@
     createIOU: function(source, destination, amount, currency) {
        
        var IOU = {
-        id: '',
-        IOU: {
-          "@context": "http://purl.org/opentabs",
-          "@type": "com:Transfer",
-          "com:source": this.makeURI(source),
-          "com:destination": this.makeURI(destination),
-          "com:amount": amount,
-          "com:currency": currency,
-          "dc:created": new Date(),
-          "rdfs:comment": 'a test IOU',
-          "ot:state": 0
-        }
-      }    
+                     "@id": "",
+                     "http://payswarm.com/vocabs/commerce#source": {
+                         "@id": this.makeURI(source)
+                      },
+                      "http://payswarm.com/vocabs/commerce#destination": {
+                          "@id": this.makeURI(destination)
+                      },
+                      "http://payswarm.com/vocabs/commerce#amount": amount,
+                      "http://payswarm.com/vocabs/commerce#currency": currency,
+                      "http://www.w3.org/2000/01/rdf-schema#comment": "Just a test IOU",
+                      "http://purl.org/dc/terms/created": new Date(),
+                      "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+                          "@id": "http://payswarm.com/vocabs/commerce#Transfer"
+                       }
+                   }       
+
       return IOU;
     },
     
