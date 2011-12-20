@@ -115,6 +115,7 @@
 <script src="javascripts/tabs.js"></script>
 <script src="javascripts/sha1.js"></script>
 <script src="javascripts/jsonld.js"></script>
+<script src="javascripts/jsonld-turtle.js"></script>
 <script src="opentabs.js"></script>
 <script>
 
@@ -267,9 +268,26 @@
       
       
       $.getJSON(baseDir + 'private/transfers.json' , function(data){
-        var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
+        //var d = JSON.parse(data);
+        //alert(JSON.stringify(data[]));
+        
+        document.IOU.IOUs = [];
+        for(var prop in data) {
+          if(data.hasOwnProperty(prop)) {
+            var source = data[prop]['http://payswarm.com/vocabs/commerce#source'][0]['value'];
+            var destination = data[prop]['http://payswarm.com/vocabs/commerce#destination'][0]['value'];
+            var amount = data[prop]['http://payswarm.com/vocabs/commerce#amount'][0]['value'];
+            var currency = data[prop]['http://payswarm.com/vocabs/commerce#currency'][0]['value'];
+            var comment = data[prop]['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
+            var date = data[prop]['http://purl.org/dc/terms/created'][0]['value'];
+            document.IOU.IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
+          }
+        }
+        
+        //var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
 
-        that.IOUs = IOUs;
+        //that.IOUs = IOUs;
+        //alert(JSON.stringify(that.IOUs));
         that.render();
       });
       
@@ -293,7 +311,7 @@
       this.deleteFile(baseDir + 'private/transfers');      
 
       // PUT
-      var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(this.IOUs)) +'" .';
+      var body = jsonld.turtle(this.IOUs);
       this.putFile(baseDir + 'private/transfers', body);
       
       
@@ -322,15 +340,28 @@
       try {
         $.getJSON(baseDir + 'private/transfers' +'.json' , function(data){
           //alert(data);
-          var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
-          if (!IOUs) IOUs = [];        
-          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+          var IOUs = [];
+          for(var prop in data) {
+            if(data.hasOwnProperty(prop)) {
+              var source = data[prop]['http://payswarm.com/vocabs/commerce#source'][0]['value'];
+              var destination = data[prop]['http://payswarm.com/vocabs/commerce#destination'][0]['value'];
+              var amount = data[prop]['http://payswarm.com/vocabs/commerce#amount'][0]['value'];
+              var currency = data[prop]['http://payswarm.com/vocabs/commerce#currency'][0]['value'];
+              var comment = data[prop]['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
+              var date = data[prop]['http://purl.org/dc/terms/created'][0]['value'];
+              IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
+            }
+          }
+
+
+          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date()));
         
           // DELETE
           that.deleteFile(baseDir + 'private/transfers');
       
           // PUT
-          var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
+          var body = jsonld.turtle(IOUs);
+//alert(body);          
           that.putFile(baseDir + 'private/transfers', body);
         
         
@@ -338,10 +369,10 @@
        
         }).error(function () {
           var IOUs = [];        
-          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val()));
+          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date() ));
         
           // PUT
-          var body = '@prefix rdf: <http://www.w3.org/1999/02/22/rdf-syntax-ns#>.\n\n<> <#IOUs> "'+ escape(JSON.stringify(IOUs)) +'" .';
+          var body = jsonld.turtle(IOUs);
           that.putFile(baseDir + 'private/transfers', body);
           
           window.location.reload();
@@ -361,7 +392,7 @@
       
       if (!this.IOUs) this.IOUs = [];
       
-      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val()));
+      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
 
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
       this.saveRemote();
@@ -488,7 +519,8 @@
       xhr.send(data);   
     },
     
-    createIOU: function(source, destination, amount, currency) {
+    
+    createIOU: function(source, destination, amount, currency, comment, date) {
        
        var IOU = {
                      "@id": "",
@@ -500,12 +532,18 @@
                       },
                       "http://payswarm.com/vocabs/commerce#amount": amount,
                       "http://payswarm.com/vocabs/commerce#currency": currency,
-                      "http://www.w3.org/2000/01/rdf-schema#comment": "Just a test IOU",
-                      "http://purl.org/dc/terms/created": new Date(),
+                      "http://www.w3.org/2000/01/rdf-schema#comment": comment,
+                      "http://purl.org/dc/terms/created": date,
                       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
                           "@id": "http://payswarm.com/vocabs/commerce#Transfer"
                        }
-                   }       
+                   };
+             
+                   
+      IOU['@id'] = '#' + hex_sha1(JSON.stringify(IOU));             
+
+//alert(IOU);
+//alert(jsonld.turtle(IOU));
 
       return IOU;
     },
