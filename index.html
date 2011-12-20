@@ -5,7 +5,7 @@
 <!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
 <head>
     <meta charset="utf-8">
-    <title>Opentabs</title>
+    <title>Opentabs (Alpha)</title>
     <meta name="description" content="">
     <meta name="author" content="">
 
@@ -458,7 +458,7 @@
     confirm: function() {
       var IOU = 'You are about to send:\n\n'+ $('#payee').val()
       IOU += '\n\nan IOU for ' + $('#quantity').val() + ' ' + $("#currency").val();
-      IOU += '\n\nAre you sure?';
+      IOU += '\n\nAre you sure?  ***All IOUs are currently TEST only***';
       return confirm(IOU);
     },
 
