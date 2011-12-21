@@ -25,10 +25,11 @@
     <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
 
     <style>
-        .gold  { background-color: #FFFF99; text-align: middle; }
-        .blue  { background-color: #EEEEFF }
-        .plus  { color: rgb(23, 136, 23) ; font-weight:bold; }
-        .minus { color: rgb(205, 23, 28) ; font-weight:bold; }
+        .gold    { background-color: #FFFF99; text-align: middle; width: 25px;}
+        .blue    { background-color: #EEEEFF }
+        .plus    { color: rgb(23, 136, 23) ; font-weight:bold; }
+        .minus   { color: rgb(205, 23, 28) ; font-weight:bold; }
+        .heading { font-weight:bold; }
          table { border-collapse:separate; border-spacing: 0.5em 0em; }        
     </style>
 
@@ -84,7 +85,6 @@
                   <input type="button" value="Send" id="save" />
               </form>
               
-              Summary:
               <div id="opentabs"></div>
 
             <li id="mobileFriendly">Advanced Settings coming soon.
@@ -415,8 +415,8 @@
       }
       
       var line = '<tr>' 
-        line += '<td>IOU</td>';
-        line += '<td class="gold">Amount</td>';
+        line += '<td class="heading">My Tabs</td>';
+        line += '<td></td>';
         line += '<td></td>';
         line += '</tr>';
       $('#opentabs').append( $('<table>').append(line) );
