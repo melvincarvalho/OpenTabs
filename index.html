@@ -433,7 +433,7 @@
           var line = '<tr>' 
           var pm = ((-1 * amount)<0)?'minus':'plus';
           
-          line += '<td title="'+ dest +'">' + dest + '</td>';
+          line += '<td nowrap="nowrap" title="'+ dest +'">' + dest + '</td>';
           line += '<td title="'+ comment +'" class="gold '+ pm +'">' + (-1 * amount) + '</td>';
           line += '<td title="'+ created +'"><a href="javascript:document.IOU.toggle()">' + curr + '</a></td>';
           line += '</tr>';
