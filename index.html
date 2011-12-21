@@ -417,7 +417,7 @@
       var line = '<tr>' 
         line += '<td>IOU</td>';
         line += '<td class="gold">Amount</td>';
-        line += '<td>Currency</td>';
+        line += '<td></td>';
         line += '</tr>';
       $('#opentabs').append( $('<table>').append(line) );
       
@@ -494,6 +494,8 @@
           $(this).html(n);
         } else if ( html.substring(0,7) == 'mailto:' ) {
           $(this).html(html.substring(7));
+        } else if ( $(this).text() == 'EUR' ) {
+          $(this).children().text('€');
         }
       });
 
