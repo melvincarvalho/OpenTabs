@@ -55,22 +55,21 @@
             <!-- Give href an ID value of corresponding "tabs-content" <li>'s -->
             <li><a class="active" href="#simple">My Tabs</a></li>
 
-            <li><a href="#lightweight">Send</a></li>
             <li><a href="#mobileFriendly">Advanced</a></li>
           </ul>
 
           <ul class="tabs-content">     
             <li id="simple" class="active">
-              <div id="opentabs">
-              
-              </div>
-            </li>
 
-            <li id="lightweight">
               <form>
+                  Send a new IOU to:
+                  <br/>
                   <select name="payee" id="payee">
                       <option value="testdummy@opentabs.net">Test Dummy</option>
-                  </select>              
+                  </select>        
+                  <br/>      
+                  Amount:
+                  <br/>
                   <select name="amount" id="quantity">
                       <option value="1">1</option>
                       <option value="5" selected>5</option>
@@ -84,7 +83,10 @@
                   </select>              
                   <input type="button" value="Send" id="save" />
               </form>
-            </li>
+              
+              Summary:
+              <div id="opentabs"></div>
+
             <li id="mobileFriendly">Advanced Settings coming soon.
               <br/>
 

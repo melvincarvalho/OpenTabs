@@ -293,9 +293,7 @@
 		font: 13px "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 		color: #777;
 		margin: 0;
-		width: 210px;
 		max-width: 100%;
-		display: block;
 		margin-bottom: 20px;
 		background: #fff; }
 	select {
@@ -316,8 +314,6 @@
 		display: block;
 		font-weight: bold;
 		font-size: 13px;  }
-	select {
-		width: 220px; }
 	input[type="checkbox"] {
 		display: inline; }
 	label span,
