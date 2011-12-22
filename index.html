@@ -207,17 +207,21 @@
 
     addFriend: function(uri, name) {
       for (i=0; i<this.friends.length; i++) {
-        if ( uri == this.friends[i].uri && name == this.friends[i].name ) return;
+        if ( uri == this.friends[i]['@id'] && name == this.friends[i]['http://xmlns.com/foaf/0.1/name'] ) return;
       }
       
-      this.friends.push({ "uri" : uri, "name" : name });
+      this.friends.push({ "@id" : uri, "http://xmlns.com/foaf/0.1/name" : name });
       window.localStorage.friends = JSON.stringify(this.friends);
+    },
+    
+    saveFriends: function() {
     },
     
     populateFriendsDropdown: function() {
       // sort friends
+      if (!this.friends) return;
       this.friends = this.friends.sort(function(a,b) { 
-        if (a.name > b.name) { 
+        if (a['http://xmlns.com/foaf/0.1/name'] > b['http://xmlns.com/foaf/0.1/name']) { 
           return 1;
         } else { 
           return -1; 
@@ -227,8 +231,8 @@
       $('#payee').children().remove().end();
       
       for (i=0; i<this.friends.length; i++) {
-        var uri  = this.friends[i].uri;
-        var name = this.friends[i].name;
+        var uri  = this.friends[i]['@id'];
+        var name = this.friends[i]['http://xmlns.com/foaf/0.1/name'];
         $("#payee").append("<option value="+ uri +">"+ name +"</option>");
       }
     },      
@@ -269,6 +273,25 @@
       
       var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
       
+
+      $.getJSON(baseDir + 'private/friends.json' , function(data){
+        
+        for(var prop in data) {
+          if(data.hasOwnProperty(prop)) {
+            var name = data[prop]['http://xmlns.com/foaf/0.1/name'][0]['value'];
+            var uri  = prop;
+            document.IOU.addFriend(uri, name);
+          }
+        }
+        
+        //var IOUs = JSON.parse(unescape(data[baseDir + 'private/transfers'][baseDir + 'private/transfers'+'#IOUs'][0]['value']));
+
+        //that.IOUs = IOUs;
+        //alert(JSON.stringify(that.IOUs));
+        that.render();
+      });
+      
+
       
       $.getJSON(baseDir + 'private/transfers.json' , function(data){
         //var d = JSON.parse(data);
@@ -317,6 +340,8 @@
       var body = jsonld.turtle(this.IOUs);
       this.putFile(baseDir + 'private/transfers', body);
       
+      var friends = jsonld.turtle(this.friends);
+      this.putFile(baseDir + 'private/friends', friends);
       
     },
     
@@ -485,8 +510,8 @@
         var n;
         //alert(JSON.stringify(that.friends));
         for (i=0; i<that.friends.length; i++) {
-          if ( that.friends[i].uri == html) {
-            n = that.friends[i].name;
+          if ( that.friends[i]['@id'] == html) {
+            n = that.friends[i]['http://xmlns.com/foaf/0.1/name'];
             //alert(n);   
           }
         }
