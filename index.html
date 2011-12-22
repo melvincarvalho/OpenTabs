@@ -30,6 +30,7 @@
         .plus    { color: rgb(23, 136, 23) ; font-weight:bold; }
         .minus   { color: rgb(205, 23, 28) ; font-weight:bold; }
         .heading { font-weight:bold; }
+        .hide    { display: none; )
          table { border-collapse:separate; border-spacing: 0.5em 0em; }        
     </style>
 
@@ -84,12 +85,10 @@
               
               <div id="opentabs"></div>
 
-            <li id="mobileFriendly">Advanced Settings coming soon.
-              <br/>
+            <li id="mobileFriendly"><span class="heading">Login</span>
+              <br/><br/>
 
-              <form>
-                <button id="clearall">Clear All IOUs</button>
-              </form>
+              <button class="hide"id="clearall">Clear All IOUs</button>
               <form action="https://data.fm/rp_auth">
                 &nbsp;(WebID) <a href="https://data.fm/login?next=http://opentabs.data.fm/"><img style="float: left" src="http://data.fm/common/images/loginWebID.png" /></a><br/><br/><br/>
               </form>
@@ -98,10 +97,10 @@
               
               <br/><br/><a href="javascript:document.IOU.FBLogin()"><img src="http://www.getfitwatford.co.uk/images/stories/images/facebook_40.gif" /></a><br/><br/>
               
-              Add New Recipient<br/>
+              <span class="heading">Add New Recipient</span><br/>
               <form>
-                  Name: <input type="text" size="5" id="name" name="name" value="" />
-                  URI : <input size="5" type="text" id="uri" name="uri" value="" />
+                  Name : <input type="text" size="20" id="name" name="name" value="" /><br/>
+                  Address : <input size="20" type="text" id="uri" name="uri" value="" /><br/>
                   <input type="button" value="Add" id="add" />
               </form>
 
@@ -132,14 +131,7 @@
   
     // Starting point
     load: function() {
-      //this.IOUs = JSON.parse(window.localStorage.getItem('IOUs')) || [];
-      if ( window.localStorage.friends ) {
-        this.friends = JSON.parse(window.localStorage.friends);
-        this.populateFriendsDropdown();
-      }
       this.loadUser();
-      //this.loadRemote();
-      //this.render();
     },
     
     // Load user details, callback to displayUser
