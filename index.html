@@ -260,6 +260,8 @@
         
         that.render();
         that.status('Loading friends...', false);
+      }).error(function(data){
+        that.status('Loading friends...', false);
       });
             
     },
@@ -292,6 +294,8 @@
           }
         }
         that.render();
+        that.status('Loading IOUs...', false);
+      }).error(function(data){
         that.status('Loading IOUs...', false);
       });
             
