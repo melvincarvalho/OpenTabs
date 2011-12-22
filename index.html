@@ -129,7 +129,6 @@
     
     IOUs: [],
     friends: [],
-    hide : true,
   
     // Starting point
     load: function() {
@@ -491,13 +490,7 @@
     },
 
     toggle: function() {
-      if ( this.hide ) {
-        $('.blue').show();
-      } else {
-        $('.blue').hide();
-      }
-      
-      this.hide = !this.hide;
+      $('.blue').slideToggle();
     },
 
     beautify: function() {
