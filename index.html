@@ -54,7 +54,7 @@
             <!-- Give href an ID value of corresponding "tabs-content" <li>'s -->
             <li><a class="active" href="#simple">My Tabs</a></li>
 
-            <li><a href="#mobileFriendly">Advanced</a></li>
+            <li><a href="#advanced">Advanced</a></li>
           </ul>
 
           <ul class="tabs-content">     
@@ -85,7 +85,7 @@
               
               <div id="opentabs"></div>
 
-            <li id="mobileFriendly"><span class="heading">Login</span>
+            <li id="advanced"><span class="heading">Login</span>
               <br/><br/>
 
               <button class="hide"id="clearall">Clear All IOUs</button>
@@ -132,6 +132,7 @@
     // Starting point
     load: function() {
       this.loadUser();
+      this.render();
     },
     
     // Load user details, callback to displayUser
@@ -155,7 +156,7 @@
       }
     },
     
-    // callback to loadFriends
+    // callback to loadFriends, calls loadRemote
     displayUser: function(user) {
       var userName = document.getElementById('welcome');
       if ( user.name ) {
@@ -192,41 +193,8 @@
         var name = data['data'][i].name;
         this.addFriend( uri, name );
       }
-      this.populateFriendsDropdown();
-      this.beautify();
+      this.render();
     },
-
-    addFriend: function(uri, name) {
-      for (i=0; i<this.friends.length; i++) {
-        if ( uri == this.friends[i]['@id'] && name == this.friends[i]['http://xmlns.com/foaf/0.1/name'] ) return;
-      }
-      
-      this.friends.push({ "@id" : uri, "http://xmlns.com/foaf/0.1/name" : name });
-      window.localStorage.friends = JSON.stringify(this.friends);
-    },
-    
-    saveFriends: function() {
-    },
-    
-    populateFriendsDropdown: function() {
-      // sort friends
-      if (!this.friends) return;
-      this.friends = this.friends.sort(function(a,b) { 
-        if (a['http://xmlns.com/foaf/0.1/name'] > b['http://xmlns.com/foaf/0.1/name']) { 
-          return 1;
-        } else { 
-          return -1; 
-        }
-      });
-      
-      $('#payee').children().remove().end();
-      
-      for (i=0; i<this.friends.length; i++) {
-        var uri  = this.friends[i]['@id'];
-        var name = this.friends[i]['http://xmlns.com/foaf/0.1/name'];
-        $("#payee").append("<option value="+ uri +">"+ name +"</option>");
-      }
-    },      
 
     // called from add button
     addRecipient: function() {
@@ -234,9 +202,10 @@
       var name = $('#name').val();
       
       this.addFriend( uri , name );
-      this.populateFriendsDropdown();
+      this.saveRemote();
       
-      alert( uri + ' added!' );
+      alert( name + ' added!' );
+      this.render();
     },
 
     // called from fb button
@@ -336,12 +305,6 @@
       
     },
     
-    createDirectory: function(dir) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('MKCOL', dir, false);
-      xhr.send();
-    },
-
     syncRemote: function() {
       // get user
       var user = this.makeURI($('#payee').val());
@@ -414,6 +377,8 @@
       this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
 
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
+      
+      // todo move this
       this.saveRemote();
       this.syncRemote();
       
@@ -427,7 +392,7 @@
       that = this;
       $('#opentabs').empty();
       if(!this.IOUs || !this.IOUs.length) {
-        $('#opentabs').append( $('<p>').text('You don\'t currently have any open tabs.') );
+        $('#opentabs').append( $('<p>').text('Currently no open tabs found.') );
         return;
       }
       
@@ -468,11 +433,40 @@
       });
       
       
-      
-      this.beautify();
+      this.populateFriendsDropdown();
+      this.beautify();      
+      this.showSummary();
       
     },
     
+    showSummary: function() {
+      $('#advanced').removeClass('active');
+      $('#simple').addClass('active');
+      $('#simple').click();
+      $('#advanced').hide();
+      $('#simple').show();
+    },
+    
+    populateFriendsDropdown: function() {
+      // sort friends
+      if (!this.friends) return;
+      this.friends = this.friends.sort(function(a,b) { 
+        if (a['http://xmlns.com/foaf/0.1/name'] > b['http://xmlns.com/foaf/0.1/name']) { 
+          return 1;
+        } else { 
+          return -1; 
+        }
+      });
+      
+      $('#payee').children().remove().end();
+      
+      for (i=0; i<this.friends.length; i++) {
+        var uri  = this.friends[i]['@id'];
+        var name = this.friends[i]['http://xmlns.com/foaf/0.1/name'];
+        $("#payee").append("<option value="+ uri +">"+ name +"</option>");
+      }
+    },      
+
     // Helpers
     confirm: function() {
       var IOU = 'You are about to send:\n\n'+ $('#payee').val()
@@ -519,6 +513,15 @@
       this.load();
     },
     
+    addFriend: function(uri, name) {
+      for (i=0; i<this.friends.length; i++) {
+        if ( uri == this.friends[i]['@id'] && name == this.friends[i]['http://xmlns.com/foaf/0.1/name'] ) return;
+      }
+      
+      this.friends.push({ "@id" : uri, "http://xmlns.com/foaf/0.1/name" : name });
+      window.localStorage.friends = JSON.stringify(this.friends);
+    },
+    
     deleteFile: function(file) {
       var body = '';
       xhr = new XMLHttpRequest();
@@ -534,6 +537,12 @@
       xhr.send(data);   
     },
     
+    createDirectory: function(dir) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('MKCOL', dir, false);
+      xhr.send();
+    },
+
     
     createIOU: function(source, destination, amount, currency, comment, date) {
        
@@ -556,9 +565,6 @@
              
                    
       IOU['@id'] = '#' + hex_sha1(JSON.stringify(IOU));             
-
-//alert(IOU);
-//alert(jsonld.turtle(IOU));
 
       return IOU;
     },
