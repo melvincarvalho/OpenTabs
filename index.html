@@ -231,9 +231,8 @@
     },
 
     loadRemote: function() {
-      this.loadRemoteFriends();
       this.loadRemoteIOUs()
-      
+      this.loadRemoteFriends();      
     },
     
     loadRemoteFriends: function() {
@@ -382,7 +381,7 @@
       this.deleteFile(baseDir + 'private/transfers');      
 
       // PUT
-      var friends = jsonld.turtle(this.friends);
+      var body = jsonld.turtle(this.friends);
       this.putFile(baseDir + 'private/friends', body);      
     },
     
