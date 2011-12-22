@@ -317,35 +317,12 @@
     },
 
     saveRemote: function() {
-      // get user
-      var user = window.user;
-      var userSha1 = hex_sha1(user);
-
-      // dirs
-      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
-      this.createDirectory(baseDir + 'public/');
-      this.createDirectory(baseDir + 'private/');
-      this.createDirectory(baseDir + 'friends/');
-
-
-      // DELETE
-      this.deleteFile(baseDir + 'private/transfers');      
-
-      // PUT
-      var body = jsonld.turtle(this.IOUs);
-      this.putFile(baseDir + 'private/transfers', body);
-      
-      var friends = jsonld.turtle(this.friends);
-      this.putFile(baseDir + 'private/friends', friends);
-      
-    },
-    
-    saveRemote: function() {
       this.saveRemoteIOUs();
       this.saveRemoteFriends();
     },
     
     saveRemoteIOUs: function() {
+      this.status('Saving IOUs...', true);
       // get user
       var user = window.user;
       var userSha1 = hex_sha1(user);
@@ -363,9 +340,11 @@
       // PUT
       var body = jsonld.turtle(this.IOUs);
       this.putFile(baseDir + 'private/transfers', body);      
+      this.status('Saving IOUs...', false);
     },
     
     saveRemoteFriends: function() {
+      this.status('Saving friends...', true);
       // get user
       var user = window.user;
       var userSha1 = hex_sha1(user);
@@ -383,11 +362,13 @@
       // PUT
       var body = jsonld.turtle(this.friends);
       this.putFile(baseDir + 'private/friends', body);      
+      this.status('Saving IOUs...', false);
     },
     
     
     
     syncRemote: function() {
+      this.status('Saving IOUs...', true);
       // get user
       var user = this.makeURI($('#payee').val());
       var userSha1 = hex_sha1(user);
@@ -429,6 +410,7 @@
         
         
           that.render();
+          that.status('Saving IOUs...', false);
        
         }).error(function () {
           var IOUs = [];        
@@ -438,6 +420,7 @@
           var body = jsonld.turtle(IOUs);
           that.putFile(baseDir + 'private/transfers', body);
           
+          that.status('Saving IOUs...', false);
           that.render();
           
         });
