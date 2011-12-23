@@ -3,6 +3,22 @@
 <!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
 <!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
 <!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<!--
+    Copyright (C) 25 Dec 2011 Melvin Carvalho, Nathan Rixham
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
 <head>
     <meta charset="utf-8">
     <title>Opentabs (Alpha)</title>
@@ -314,6 +330,7 @@
     },
 
     saveLocal: function() { 
+      this.status('Saving IOUs...', true);
       if (!this.IOUs) this.IOUs = [];
       this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
@@ -325,7 +342,6 @@
     },
     
     saveRemoteIOUs: function() {
-      this.status('Saving IOUs...', true);
       // get user
       var user = window.user;
       var userSha1 = hex_sha1(user);
