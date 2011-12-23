@@ -358,7 +358,7 @@
 
 
       // DELETE
-      this.deleteFile(baseDir + 'private/transfers');      
+      this.deleteFile(baseDir + 'private/friends');      
 
       // PUT
       var body = jsonld.turtle(this.friends);
@@ -647,7 +647,7 @@
   $(document).ready(function() {
     document.IOU = new IOU; 
     $('#clearall').click(function() { document.IOU.clear() });
-    $('#save').click(function() { document.IOU.saveLocal() });
+    $('#save').click(function() { document.IOU.save() });
     $('#add').click(function() { document.IOU.addRecipient() });
   });
   
