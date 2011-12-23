@@ -231,7 +231,7 @@
     },
 
     loadRemote: function() {
-      this.loadRemoteIOUs()
+      this.loadRemoteIOUs();
       this.loadRemoteFriends();      
     },
     
@@ -249,7 +249,6 @@
       
 
       $.getJSON(baseDir + 'private/friends.json' , function(data){
-        
         for(var prop in data) {
           if(data.hasOwnProperty(prop)) {
             var name = data[prop]['http://xmlns.com/foaf/0.1/name'][0]['value'];
@@ -302,21 +301,19 @@
     },
     
     save: function() {
-      this.saveLocal();
-      this.saveRemote();
-      this.syncRemote();
-    },
-
-    saveLocal: function() {
       if( !this.confirm() ) {
         alert('Operation Cancelled');
         return;
       }
       
-      if (!this.IOUs) this.IOUs = [];
-      
-      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
+      this.saveLocal();
+      this.saveRemote();
+      this.syncRemote();
+    },
 
+    saveLocal: function() { 
+      if (!this.IOUs) this.IOUs = [];
+      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
     },
 
@@ -439,6 +436,7 @@
     // render
     render: function() {
       that = this;
+      this.populateFriendsDropdown();
       $('#opentabs').empty();
       if(!this.IOUs || !this.IOUs.length) {
         $('#opentabs').append( $('<p>').text('Currently no open tabs found.') );
@@ -482,7 +480,6 @@
       });
       
       
-      this.populateFriendsDropdown();
       this.beautify();      
       this.showSummary();
       
@@ -506,7 +503,6 @@
           return -1; 
         }
       });
-      
       $('#payee').children().remove().end();
       
       for (i=0; i<this.friends.length; i++) {
