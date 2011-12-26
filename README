@@ -9,4 +9,6 @@ How it works
 
 The Opentabs.net web app does not make actual transactions. It is not a currency, and it is not a bank. It just helps you to cryptographically sign open tabs (»IOUs«) between peers, as an alternative to actually executing a bank transfer. This way we can both forget about what we owe each other, and strike it off against other transactions, until maybe at the end of the year we clear the balance once, and settle the tab. Just like tabs in a bar.
 
+See PROTOCOL for the current opentabs protocol.
+
 If you have questions, go to http://webchat.freenode.net/?channels=unhosted and ask. If you don't get an immediate reply, email support @unhosted.org.
