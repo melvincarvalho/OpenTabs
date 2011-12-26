@@ -34,6 +34,9 @@
     <link rel="stylesheet" href="stylesheets/skeleton.css">
     <link rel="stylesheet" href="stylesheets/layout.css">
 
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css">
+
+
     <link rel="shortcut icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
@@ -58,7 +61,7 @@
 <body>
 
 <script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
 
     <div class="container">
 
@@ -108,24 +111,29 @@
               <div class="plus" id="status"></div>
               <div class="note">Note: All test data will be deleted 31 Jan 2012</div>
 
-            <li id="advanced"><span class="heading">Login</span>
+            <li id="advanced"><span class="heading"><a href="javascript:document.IOU.loginPopup()">Login</a></span>
               <br/><br/>
 
-              <button class="hide"id="clearall">Clear All IOUs</button>
-              <form action="https://data.fm/rp_auth">
+              <button class="hide" id="clearall">Clear All IOUs</button>
+              
+              
+              <form id="loginPopup" class="hide" action="https://data.fm/rp_auth">
                 &nbsp;WebID <a href="https://data.fm/login?next=http://opentabs.data.fm/"><img height="60" width="105" style="float: left" src="http://www.w3.org/wiki/images/0/03/Foaf%2Bssl%24foaf_keylock_small.png" /></a><br/>
-              </form>
               <br/><br/><a href="javascript:document.IOU.FBLogin()"><img src="http://www.ikerjimenez.com/imagenes/logo-facebook.gif" /></a><br/>
               <a href="https://data.fm/login?provider=Gmail&next=http://opentabs.data.fm/"><img src="https://s3.amazonaws.com/foaf/gmail.png" /></a><br/>
               <a href="https://data.fm/login?provider=Yahoo&next=http://opentabs.data.fm/"><img src="https://s3.amazonaws.com/foaf/yahoo.png" /></a><br/>
+              </form>
               
-              <br/><br/>
-              <span class="heading">Add New Recipient</span><br/>
-              <form>
-                  Name : <input type="text" size="20" id="name" name="name" value="" /><br/>
-                  Address : <input size="20" type="text" id="uri" name="uri" value="" /><br/>
+              <br/>
+              <span class="heading"><a href="javascript:document.IOU.addR()">Add New Recipient</a></span><br/>
+              <form id="addRecipient" class="hide">
+                  Name : <br/><input type="text" size="20" id="name" name="name" value="" /><br/>
+                  Web Address : <br/><input size="20" type="text" id="uri" name="uri" value="" /><br/>
                   <input type="button" value="Add" id="add" />
               </form>
+              
+              <br/>
+              <br/>
 
               <a href="https://github.com/melvincarvalho/OpenTabs" rel="doap:homepage">Fork me on Github!</a>
               
@@ -136,6 +144,14 @@
         </div>
 
     </div>
+    
+
+
+
+
+
+
+    
 
 <script src="javascripts/tabs.js"></script>
 <script src="javascripts/sha1.js"></script>
@@ -660,6 +676,14 @@
       } else {
         return 'mailto:' + id;
       }
+    },
+    
+    addR: function(id) {
+      $('#addRecipient').dialog();
+    },
+    
+    loginPopup: function(id) {
+      $('#loginPopup').dialog();
     }
     
   };
