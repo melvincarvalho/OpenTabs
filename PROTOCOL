@@ -14,7 +14,7 @@ Authentication
 
 Opentabs does not specify the authentication method, but so far WebID,
 Oauth2 (Gmail/Yahoo) and Facebook connect are supported.  We are keen
-to support WebID, more can be added on request.
+to support BrowserID, more can be added on request.
 
 
 Linking a User to IOUs
