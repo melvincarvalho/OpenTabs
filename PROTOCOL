@@ -1,0 +1,119 @@
+Opentabs PROTOCOL
+==================
+
+
+User
+====
+
+Each user is a URI.  URIs link to other URIs using linked data
+principles, including Webfinger discovery, and web Intents.
+
+
+Authentication
+==============
+
+Opentabs does not specify the authentication method, but so far WebID,
+Oauth2 (Gmail/Yahoo) and Facebook connect are supported.  We are keen
+to support WebID, more can be added on request.
+
+
+Linking a User to IOUs
+=======================
+
+This is to be defined so that a user can have one or more spaces for
+storing IOUs.
+
+<#me> opentabs:IOUs <target>
+
+Currently for the alpha test we are storing <target> in a well known
+location on the MIT data.fm server.  As things scale to beta and full
+production distributing the storage will be a key consideration.  It
+is a project goal to port the system to be usable with the unhosted
+infrastructure.
+
+
+
+IOU
+===
+
+We use the following template based on the payswarm Transfer type.
+
+source      (aka payer)
+destination (aka payee)
+amount      (aka quantity)
+currency
+comment     (aka note / description)
+created     (aka createddate)
+
+
+Each IOU is a self describing data structure, general with global
+namespaces to enable a scale free system.
+
+In JSON:
+
+{
+   "@id": "#1234567890",
+   "http://payswarm.com/vocabs/commerce#source": {
+       "@id": "http://melvincarvalho.com#me"
+   },
+   "http://payswarm.com/vocabs/commerce#destination": {
+       "@id": "http://webr3.org/nathan#me"
+   },
+   "http://payswarm.com/vocabs/commerce#amount": "5",
+   "http://payswarm.com/vocabs/commerce#currency": "EUR",
+   "http://www.w3.org/2000/01/rdf-schema#comment": "Just a test IOU",
+   "http://purl.org/dc/terms/created": "2011-12-20T15:42:41.030Z",
+   "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
+       "@id": "http://payswarm.com/vocabs/commerce#Transfer"
+   }
+}
+
+In Turtle
+
+<#1234567890>
+  <http://payswarm.com/vocabs/commerce#amount> "5";
+  <http://payswarm.com/vocabs/commerce#currency> "EUR";
+  <http://payswarm.com/vocabs/commerce#destination>
+<http://webr3.org/nathan#me>;
+  <http://payswarm.com/vocabs/commerce#source> <http://melvincarvalho.com#me>;
+  <http://purl.org/dc/terms/created> "2011-12-20T15:42:41.030Z";
+  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+<http://payswarm.com/vocabs/commerce#Transfer>;
+  <http://www.w3.org/2000/01/rdf-schema#comment> "Just a test IOU".
+
+Experiment in the JSON playground
+
+http://is.gd/Km1iOA
+
+The abstract nature of this data structure makes it both extensible,
+linkable and transformable to other formats.
+
+
+Aggregation
+===========
+
+It is the job of the front end to aggregate, net and display IOUs to the user.
+
+
+Friends
+=======
+
+For convenience we currently try and pull in a list of friends to
+populate the payee dropdown.  New recipients can be added and are
+cached.
+
+
+Workflow
+========
+
+Currently we have only the most basic workflow for adding an IOU.
+Without doubt there will be more added, but our aim is to decouple the
+data layer with the application logic so that arbitrarily many
+workflows are possible working with the same data stores.
+
+
+Encryption
+==========
+
+Currently we have not included encryption and signature for the alpha,
+but it is on the roadmap.
