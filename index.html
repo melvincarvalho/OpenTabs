@@ -88,7 +88,7 @@
                   <br/>
                   <select name="payee" id="payee">
                       <option value="testdummy@opentabs.net">Test Dummy</option>
-                  </select>        
+                  </select>&nbsp;<a href="javascript:document.IOU.addR()"><img src="http://www.blue-xplosion.de/img/icon_add.png" /></a>
                   <br/>      
                   Amount:
                   <br/>
@@ -111,7 +111,7 @@
               <div class="plus" id="status"></div>
               <div class="note">Note: All test data will be deleted 31 Jan 2012</div>
 
-            <li id="advanced"><span class="heading"><a href="javascript:document.IOU.loginPopup()">Login</a></span>
+            <li id="advanced"><span class="heading hide"><a href="javascript:document.IOU.loginPopup()">Login</a></span>
               <br/><br/>
 
               <button class="hide" id="clearall">Clear All IOUs</button>
@@ -125,7 +125,7 @@
               </form>
               
               <br/>
-              <span class="heading"><a href="javascript:document.IOU.addR()">Add New Recipient</a></span><br/>
+              <span class="heading hide"><a href="javascript:document.IOU.addR()">Add New Recipient</a></span><br/>
               <form id="addRecipient" class="hide">
                   Name : <br/><input type="text" size="20" id="name" name="name" value="" /><br/>
                   Web Address : <br/><input size="20" type="text" id="uri" name="uri" value="" /><br/>
@@ -206,6 +206,10 @@
         window.user = 'https://graph.facebook.com/' + user.id;
         userName.innerHTML = 'Greetings, ' + user.name;
         this.loadFBFriends();
+      } else if (!window.user || window.user.substring(0,4) == 'dns:') {
+        window.user = user; 
+        var userName = document.getElementById('welcome');
+        userName.innerHTML = 'User: ' + window.user + '&nbsp;' + '<a href="javascript:document.IOU.loginPopup()"><img src="https://browserid.org/i/sign_in_blue.png"/></a>' ;
       } else {
         window.user = user; 
         var userName = document.getElementById('welcome');
