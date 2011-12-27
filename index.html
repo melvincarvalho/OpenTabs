@@ -304,6 +304,8 @@
         that.render();
         that.status('Loading friends...', false);
       }).error(function(data){
+        that.addFriend('testdummy@opentabs.net', 'Test Dummy');
+        that.render();
         that.status('Loading friends...', false);
       });
             
