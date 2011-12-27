@@ -206,14 +206,14 @@
         window.user = 'https://graph.facebook.com/' + user.id;
         userName.innerHTML = 'Greetings, ' + user.name;
         this.loadFBFriends();
-      } else if (!window.user || window.user.substring(0,4) == 'dns:') {
-        window.user = user; 
-        var userName = document.getElementById('welcome');
-        userName.innerHTML = 'User: ' + window.user + '&nbsp;' + '<a href="javascript:document.IOU.loginPopup()"><img src="https://browserid.org/i/sign_in_blue.png"/></a>' ;
       } else {
         window.user = user; 
         var userName = document.getElementById('welcome');
-        userName.innerHTML = 'User: ' + window.user;
+        if (user.substring(0,4) == 'dns:' ) {
+          userName.innerHTML = 'IP: ' + window.user + '&nbsp;' + '<a href="javascript:document.IOU.loginPopup()"><img src="https://browserid.org/i/sign_in_blue.png"/'+'></a>' ;
+        } else {
+          userName.innerHTML = 'User: ' + window.user;
+        }
       }
       this.loadRemote();
     },
