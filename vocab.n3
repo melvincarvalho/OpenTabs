@@ -1,0 +1,35 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/terms/>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix : <opentabs#> .
+
+
+<opentabs#> a owl:Ontology ;
+   dc:created "2011-12-27"^^xsd:date;
+   foaf:maker <http://melvincarvalho.com/#me>;
+   vs:term_status "unstable";
+   rdfs:label "Ontology for opentabs distributed IOU system.";
+   rdfs:seeAlso <http://opentabs.net/>;
+   rdfs:comment """
+   Ontology for opentabs
+   This is in development. 
+   Some other ontologies to look at:
+     * http://payswarm.com/vocabs/commerce
+   """@en.
+
+
+:tabs a owl:DatatypeProperty;
+   rdfs:label "tabs"@en;
+   rdfs:isDefinedBy <opentabs#>;
+   vs:term_status "unstable";
+   rdfs:comment """
+       A document containing a list of tabs / IOUs .
+    """@en;
+   rdfs:domain xsd:anyURI;
+   rdfs:range xsd:anyURI .
+
+
