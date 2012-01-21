@@ -246,6 +246,7 @@
   var IOU = function() { this.load() };
   IOU.prototype = {
     
+    user: null,
     IOUs: [],
     friends: [],
     statuses: [],
@@ -284,16 +285,16 @@
       var userName = document.getElementById('welcome');
       if ( user.name ) {
         var greetingText = document.createTextNode('Greetings, ' + user.name + '.');
-        window.user = 'https://graph.facebook.com/' + user.id;
+        this.user = 'https://graph.facebook.com/' + user.id;
         userName.innerHTML = 'Greetings, ' + user.name;
         this.loadFBFriends();
       } else {
-        window.user = user; 
+        this.user = user; 
         var userName = document.getElementById('welcome');
         if (user.substring(0,4) == 'dns:' ) {
-          userName.innerHTML = 'IP: ' + window.user + '&nbsp;' + '<a href="javascript:document.IOU.loginPopup()"><img src="https://browserid.org/i/sign_in_blue.png"/'+'></a>' ;
+          userName.innerHTML = 'IP: ' + this.user + '&nbsp;' + '<a href="javascript:document.IOU.loginPopup()"><img src="https://browserid.org/i/sign_in_blue.png"/'+'></a>' ;
         } else {
-          userName.innerHTML = 'User: ' + window.user;
+          userName.innerHTML = 'User: ' + this.user;
         }
       }
       this.loadRemote();
@@ -361,7 +362,7 @@
       this.status('Loading friends...', true);
       
       // get user
-      var user = window.user;
+      var user = this.user;
       if (!user) return;
       var userSha1 = hex_sha1(user);
       
@@ -393,7 +394,7 @@
       this.status('Loading IOUs...', true);
       
       // get user
-      var user = window.user;
+      var user = this.user;
       if (!user) return;
       var userSha1 = hex_sha1(user);
       
@@ -438,7 +439,7 @@
     saveLocal: function() { 
       this.status('Saving IOUs...', true);
       if (!this.IOUs) this.IOUs = [];
-      this.IOUs.push(this.createIOU(window.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
+      this.IOUs.push(this.createIOU(this.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
     },
 
@@ -449,7 +450,7 @@
     
     saveRemoteIOUs: function() {
       // get user
-      var user = window.user;
+      var user = this.user;
       var userSha1 = hex_sha1(user);
 
       // dirs
@@ -471,7 +472,7 @@
     saveRemoteFriends: function() {
       this.status('Saving friends...', true);
       // get user
-      var user = window.user;
+      var user = this.user;
       var userSha1 = hex_sha1(user);
 
       // dirs
@@ -524,7 +525,7 @@
           }
 
 
-          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date()));
+          IOUs.push(that.createIOU($('#payee').val(), that.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date()));
         
           // DELETE
           that.deleteFile(baseDir + 'private/transfers');
@@ -539,7 +540,7 @@
        
         }).error(function () {
           var IOUs = [];        
-          IOUs.push(that.createIOU($('#payee').val(), window.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date() ));
+          IOUs.push(that.createIOU($('#payee').val(), that.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date() ));
         
           // PUT
           var body = jsonld.turtle(IOUs);
