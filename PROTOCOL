@@ -1,6 +1,11 @@
 Opentabs PROTOCOL
 ==================
 
+Opentabs follows the Web Credits Draft spec proposed at the W3C
+Web Payments group.
+
+http://webcredits.org/
+
 
 User
 ====
@@ -110,6 +115,18 @@ Currently we have only the most basic workflow for adding an IOU.
 Without doubt there will be more added, but our aim is to decouple the
 data layer with the application logic so that arbitrarily many
 workflows are possible working with the same data stores.
+
+
+A Basic Example
+================
+
+Alice wants to give bob 5 euros
+
+Alice authenticates
+The app discovers where alices wallet is
+Alice takes 5 euro out of her wallet (by adding the JSON)
+Alice gives 5 euros to bob (by giving him the JSON) 
+Bob puts 5 euros in his wallet using a POST the JSON
 
 
 Encryption
