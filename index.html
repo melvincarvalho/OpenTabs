@@ -267,7 +267,6 @@
       
       var script = document.createElement('script');
       script.src = this.userDetailsURI;
-      alert(this.userDetailsURI);
       document.body.appendChild(script);
     },
     
@@ -307,7 +306,7 @@
       this.status('Loading friends...', true);
       var accessToken = window.location.hash.substring(1);
       var path = "https://graph.facebook.com/me/friends?";
-      var queryParams = [accessToken, 'callback=document.IOU.displayFriends'];
+      var queryParams = [accessToken, 'callback=document.IOU.displayFBFriends'];
       var query = queryParams.join('&');
       var url = path + query;
 
@@ -317,7 +316,7 @@
       document.body.appendChild(script);        
     },    
 
-    displayFriends: function(data) {
+    displayFBFriends: function(data) {
       this.status('Loading friends...', false);
       var str;
       for (i=0; i<data['data'].length; i++) {
@@ -369,11 +368,8 @@
       var userSha1 = hex_sha1(user);
       
       that = this;
-      
-      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
-      
 
-      $.getJSON(baseDir + 'private/friends.json' , function(data){
+      $.getJSON(this.   getFriendsURI(user) , function(data){
         for(var prop in data) {
           if(data.hasOwnProperty(prop)) {
             var name = data[prop]['http://xmlns.com/foaf/0.1/name'][0]['value'];
@@ -392,6 +388,12 @@
             
     },
     
+    getFriendsURI: function(user) {
+      // data fm friends
+      var baseDir = 'http://opentabs.data.fm/d/' + hex_sha1(user).substring(0,2) + '/' + hex_sha1(user).substring(2) + '/';
+      return baseDir + 'private/friends';
+    },
+    
     loadRemoteIOUs: function() {
       this.status('Loading IOUs...', true);
       
@@ -402,10 +404,7 @@
       
       that = this;
       
-      var baseDir = 'http://opentabs.data.fm/d/' + userSha1.substring(0,2) + '/' + userSha1.substring(2) + '/';
-      
-
-      $.getJSON(baseDir + 'private/transfers.json' , function(data){
+      $.getJSON(this.getWalletURI(user) , function(data){
         
         document.IOU.IOUs = [];
         for(var prop in data) {
@@ -425,6 +424,12 @@
         that.status('Loading IOUs...', false);
       });
             
+    },
+    
+    getWalletURI: function(user) {
+      // data fm wallet
+      var baseDir = 'http://opentabs.data.fm/d/' + hex_sha1(user).substring(0,2) + '/' + hex_sha1(user).substring(2) + '/';
+      return baseDir + 'private/transfers';
     },
     
     save: function() {
@@ -463,11 +468,11 @@
 
 
       // DELETE
-      this.deleteFile(baseDir + 'private/transfers');      
+      this.deleteFile(this.getWalletURI(user));      
 
       // PUT
       var body = jsonld.turtle(this.IOUs);
-      this.putFile(baseDir + 'private/transfers', body);      
+      this.postFile(this.getWalletURI(user), body);      
       this.status('Saving IOUs...', false);
     },
     
@@ -485,11 +490,11 @@
 
 
       // DELETE
-      this.deleteFile(baseDir + 'private/friends');      
+      this.deleteFile(this.getFriendsURI(user));      
 
       // PUT
       var body = jsonld.turtle(this.friends);
-      this.putFile(baseDir + 'private/friends', body);      
+      this.postFile(this.getFriendsURI(user));      
       this.status('Saving friends...', false);
     },
     
@@ -511,7 +516,7 @@
 
 
       try {
-        $.getJSON(baseDir + 'private/transfers' +'.json' , function(data){
+        $.getJSON(this.getWalletURI(user) , function(data){
           //alert(data);
           var IOUs = [];
           for(var prop in data) {
@@ -534,7 +539,7 @@
       
           // PUT
           var body = jsonld.turtle(IOUs);
-          that.putFile(baseDir + 'private/transfers', body);
+          that.postFile(baseDir + 'private/transfers', body);
         
         
           that.render();
@@ -705,6 +710,13 @@
     putFile: function(file, data) {
       xhr = new XMLHttpRequest();
       xhr.open('PUT', file, false);
+      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.send(data);   
+    },
+    
+    postFile: function(file, data) {
+      xhr = new XMLHttpRequest();
+      xhr.open('POST', file, false);
       xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
       xhr.send(data);   
     },
