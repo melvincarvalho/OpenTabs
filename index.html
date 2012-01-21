@@ -250,32 +250,34 @@
     IOUs: [],
     friends: [],
     statuses: [],
+    userDetailsURI: 'https://data.fm/user.js',
+    walletURI: null,
+    friendsURI: null,
   
     // Starting point
     load: function() {
       this.status('Loading user...', true);
-      this.loadUser();
+      this.getUserDetails();
       this.render();
     },
     
     // Load user details, callback to displayUser
-    loadUser: function() {
+    getUserDetails: function() {
+      this.userDetailsURI = this.getUserDetailsURI('document.IOU.displayUser');
+      
+      var script = document.createElement('script');
+      script.src = this.userDetailsURI;
+      alert(this.userDetailsURI);
+      document.body.appendChild(script);
+    },
+    
+    getUserDetailsURI: function(callback) {
       // Non Facebook
       if (window.location.hash.length == 0) {
-        var script = document.createElement('script');
-        script.src = 'https://data.fm/user.js?callback=document.IOU.displayUser';
-        document.body.appendChild(script);   
-      // Facebook     
+        return this.userDetailsURI + '?callback=' + callback;
+      // Facebook
       } else {
-        var accessToken = window.location.hash.substring(1);
-        var path = "https://graph.facebook.com/me?";
-        var queryParams = [accessToken, 'callback=document.IOU.displayUser'];
-        var query = queryParams.join('&');
-        var url = path + query;
-
-        var script = document.createElement('script');
-        script.src = url;
-        document.body.appendChild(script);        
+        return "https://graph.facebook.com/me?" + window.location.hash.substring(1) + '&callback=' + callback;
       }
     },
     
@@ -775,6 +777,7 @@
     }
     
   };
+  
   
   // Init
   $(document).ready(function() {
