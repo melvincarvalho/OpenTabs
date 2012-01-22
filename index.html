@@ -247,33 +247,33 @@
   IOU.prototype = {
     
     user: null,
-    IOUs: [],
+    IOUs: {},
     friends: [],
     statuses: [],
-    userDetailsURI: 'https://data.fm/user.js',
+    userProfileURI: 'https://data.fm/user.js',
     walletURI: null,
     friendsURI: null,
   
     // Starting point
     load: function() {
       this.status('Loading user...', true);
-      this.getUserDetails();
+      this.getuserProfile();
       this.render();
     },
     
     // Load user details, callback to displayUser
-    getUserDetails: function() {
-      this.userDetailsURI = this.getUserDetailsURI('document.IOU.displayUser');
+    getuserProfile: function() {
+      this.userProfileURI = this.getUserProfileURI('document.IOU.displayUser');
       
       var script = document.createElement('script');
-      script.src = this.userDetailsURI;
+      script.src = this.userProfileURI;
       document.body.appendChild(script);
     },
     
-    getUserDetailsURI: function(callback) {
+    getUserProfileURI: function(callback) {
       // Non Facebook
       if (window.location.hash.length == 0) {
-        return this.userDetailsURI + '?callback=' + callback;
+        return this.userProfileURI + '?callback=' + callback;
       // Facebook
       } else {
         return "https://graph.facebook.com/me?" + window.location.hash.substring(1) + '&callback=' + callback;
@@ -395,17 +395,11 @@
     },
     
     loadRemoteIOUs: function() {
-      this.status('Loading IOUs...', true);
-      
-      // get user
-      var user = this.user;
-      if (!user) return;
-      var userSha1 = hex_sha1(user);
-      
+      this.status('Loading IOUs...', true);      
       that = this;
       
-      $.getJSON(this.getWalletURI(user) , function(data){
-        
+      $.getJSON(this.getWalletURI(this.user) , function(data){
+        /*
         document.IOU.IOUs = [];
         for(var prop in data) {
           if(data.hasOwnProperty(prop)) {
@@ -418,6 +412,8 @@
             document.IOU.IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
           }
         }
+        */
+        that.IOUs = that.mergeObjects(that.IOUs, data);
         that.render();
         that.status('Loading IOUs...', false);
       }).error(function(data){
@@ -446,7 +442,8 @@
     saveLocal: function() { 
       this.status('Saving IOUs...', true);
       if (!this.IOUs) this.IOUs = [];
-      this.IOUs.push(this.createIOU(this.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() ));
+      var newIOU = this.createIOU(this.user, this.makeURI($('#payee').val()), $('#quantity').val(), $('#currency').val(), 'test', new Date() );
+      this.IOUs = this.mergeObjects( this.IOUs, newIOU);
       window.localStorage.setItem('IOUs', JSON.stringify(this.IOUs));
     },
 
@@ -471,7 +468,8 @@
       this.deleteFile(this.getWalletURI(user));      
 
       // PUT
-      var body = jsonld.turtle(this.IOUs);
+      //var body = jsonld.turtle(this.IOUs);
+      var body = JSON.stringify(this.IOUs);
       this.postFile(this.getWalletURI(user), body);      
       this.status('Saving IOUs...', false);
     },
@@ -518,6 +516,7 @@
       try {
         $.getJSON(this.getWalletURI(user) , function(data){
           //alert(data);
+          /*
           var IOUs = [];
           for(var prop in data) {
             if(data.hasOwnProperty(prop)) {
@@ -530,15 +529,18 @@
               IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
             }
           }
+          */
+          
+          var IOUs = data;
+          
+          IOUs = that.mergeObjects(IOUs, that.createIOU($('#payee').val(), that.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date()));
 
-
-          IOUs.push(that.createIOU($('#payee').val(), that.user, -1.0*$('#quantity').val(), $('#currency').val(), 'test', new Date()));
-        
           // DELETE
           that.deleteFile(baseDir + 'private/transfers');
       
           // PUT
-          var body = jsonld.turtle(IOUs);
+          //var body = jsonld.turtle(IOUs);
+          var body = JSON.stringify(IOUs);
           that.postFile(baseDir + 'private/transfers', body);
         
         
@@ -569,7 +571,11 @@
     render: function() {
       that = this;
       this.populateFriendsDropdown();
+      
+      
       $('#opentabs').empty();
+      
+      /*
       if(!this.IOUs || !this.IOUs.length) {
         $('#opentabs').append( $('<p>').text('Currently no open tabs found.') );
         return;
@@ -614,8 +620,82 @@
       
       this.beautify();      
       this.showSummary();
+      */
       
+      var ledger = {};
+      
+      var line = '<tr><thead>' 
+        line += '<td class="heading">My Tabs</td>';
+        line += '<td class="heading">Amount</td>';
+        line += '<td><a href="javascript:document.IOU.toggle()"><img src="http://careers.advamed.org/images/new/icon_collapse_all.gif"/'+'></a></td>';
+        line += '</thead></tr>';
+      $('#opentabs').append( $('<table class="bordered">').append(line) );
+      
+
+      for(var id in this.IOUs) {
+        if(this.IOUs.hasOwnProperty(id)) {
+          var kv = this.IOUs[id];
+          var amount = kv["http://payswarm.com/vocabs/commerce#amount"][0]['value'];
+          var curr = kv["http://payswarm.com/vocabs/commerce#currency"][0]['value'];
+          var dest = kv["http://payswarm.com/vocabs/commerce#destination"][0]['value'];
+          var source = kv["http://payswarm.com/vocabs/commerce#source"][0]['value'];
+          var created = kv["http://purl.org/dc/terms/created"][0]['value'];
+          var comment = kv['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
+          
+          var line = '<tr>' 
+          var pm = ((-1 * amount)<0)?'minus':'plus';
+          
+          line += '<td nowrap="nowrap" title="'+ dest +'">' + dest + '</td>';
+          line += '<td title="'+ comment +'" class="gold '+ pm +'">' + (-1 * amount) + '</td>';
+          line += '<td title="'+ created +'"><a href="javascript:document.IOU.toggle()">' + curr + '</a></td>';
+          line += '</tr>';
+          if ( $('td:contains("'+ dest +'")').length > 0 ) {
+            var prev = $('td:contains("'+ dest +'")').first().next().html();
+            var sum = 1.0*prev + (-1 * amount );
+            pm = (sum<0)?'minus':'plus';
+            var el = $('td:contains("'+ dest +'")').first();
+            el.next().html(sum).removeClass('plus minus').addClass(pm);
+            el.parent().after(line).next().addClass('blue').hide();
+          } else {
+            $('#opentabs table tr:last').after(line);
+            $('#opentabs table tr:last').after(line).next().addClass('blue').hide();
+          }
+          
+        }
+      }
+      
+      this.beautify();      
+      this.showSummary();
+      
+      //$('#opentabs').append(that.renderRawParagraph(that.IOUs));
     },
+
+    renderRaw: function(data) {
+      return JSON.stringify(data);
+    },
+    
+    renderRawParagraph: function(data) {
+      var ret = '';   
+    
+      for(var id in data) {
+        if(data.hasOwnProperty(id)) {
+          var kv = data[id];
+          ret += '<p>' + id + '</p>';
+          for(var key in kv) {
+            if(kv.hasOwnProperty(key)) {
+              val = kv[key];
+              ret += '<p>&nbsp;&nbsp;' + JSON.stringify(key) + '</p>';
+              for ( var i=0; i<val.length; i++) {
+                ret += '<p>&nbsp;&nbsp;&nbsp;&nbsp;' + JSON.stringify(kv[key][i]['value']) + '</p>';
+              }
+            }
+          }
+        }
+      }
+      return ret;
+    },
+    
+
     
     showSummary: function() {
       $('#advanced').removeClass('active');
@@ -703,22 +783,24 @@
       var body = '';
       xhr = new XMLHttpRequest();
       xhr.open('DELETE', file, false);
-      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
       xhr.send(body);      
     },
     
     putFile: function(file, data) {
       xhr = new XMLHttpRequest();
       xhr.open('PUT', file, false);
-      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
       xhr.send(data);   
+      //alert(data);
     },
     
     postFile: function(file, data) {
       xhr = new XMLHttpRequest();
       xhr.open('POST', file, false);
-      xhr.setRequestHeader('Content-Type', 'text/turtle; charset=UTF-8');
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
       xhr.send(data);   
+      //alert(data);
     },
     
     createDirectory: function(dir) {
@@ -762,12 +844,60 @@
                       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
                           "@id": "http://payswarm.com/vocabs/commerce#Transfer"
                        }
+                    };
+                       
+        var subject = hex_sha1(JSON.stringify(jsonld.normalize(IOU)));
+        
+        var legacyIOU = {};
+            legacyIOU[subject] = {
+                    "http://payswarm.com/vocabs/commerce#amount" : [ {
+                        "value" : amount,
+                        "type" : "literal"
+                        }
+                      
+                      ],
+                    "http://payswarm.com/vocabs/commerce#currency" : [ {
+                        "value" : currency,
+                        "type" : "literal"
+                        }
+                      
+                      ],
+                    "http://payswarm.com/vocabs/commerce#destination" : [ {
+                        "value" : destination,
+                        "type" : "uri"
+                        }
+                      
+                      ],
+                    "http://payswarm.com/vocabs/commerce#source" : [ {
+                        "value" : source,
+                        "type" : "uri"
+                        }
+                      
+                      ],
+                    "http://purl.org/dc/terms/created" : [ {
+                        "value" : date,
+                        "type" : "literal"
+                        }
+                      
+                      ],
+                    "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : [ {
+                        "value" : "http://payswarm.com/vocabs/commerce#Transfer",
+                        "type" : "uri"
+                        }
+                      
+                      ],
+                    "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+                        "value" : comment,
+                        "type" : "literal"
+                        }
+                      
+                      ]
+                       
                    };
              
                    
-      IOU['@id'] = '#' + hex_sha1(JSON.stringify(IOU));             
-
-      return IOU;
+      // TODO upgrade to latest spec             
+      return legacyIOU;
     },
     
     makeURI: function(id) {
@@ -778,6 +908,13 @@
       } else {
         return 'mailto:' + id;
       }
+    },
+    
+    mergeObjects: function (obj1,obj2) {
+      var obj3 = {};
+      for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
+      for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
+      return obj3;
     },
     
     addR: function(id) {
