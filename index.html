@@ -635,6 +635,12 @@
       for(var id in this.IOUs) {
         if(this.IOUs.hasOwnProperty(id)) {
           var kv = this.IOUs[id];
+          if (!kv["http://purl.org/commerce#amount"]) continue;
+          if (!kv["http://purl.org/commerce#currency"]) continue;
+          if (!kv["http://purl.org/commerce#destination"]) continue;
+          if (!kv["http://purl.org/commerce#source"]) continue;
+          if (!kv["http://purl.org/dc/terms/created"]) continue;
+          
           var amount = kv["http://purl.org/commerce#amount"][0]['value'];
           var curr = kv["http://purl.org/commerce#currency"][0]['value'];
           var dest = kv["http://purl.org/commerce#destination"][0]['value'];
