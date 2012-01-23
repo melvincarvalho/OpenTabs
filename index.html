@@ -403,10 +403,10 @@
         document.IOU.IOUs = [];
         for(var prop in data) {
           if(data.hasOwnProperty(prop)) {
-            var source = data[prop]['http://payswarm.com/vocabs/commerce#source'][0]['value'];
-            var destination = data[prop]['http://payswarm.com/vocabs/commerce#destination'][0]['value'];
-            var amount = data[prop]['http://payswarm.com/vocabs/commerce#amount'][0]['value'];
-            var currency = data[prop]['http://payswarm.com/vocabs/commerce#currency'][0]['value'];
+            var source = data[prop]['http://purl.org/commerce#source'][0]['value'];
+            var destination = data[prop]['http://purl.org/commerce#destination'][0]['value'];
+            var amount = data[prop]['http://purl.org/commerce#amount'][0]['value'];
+            var currency = data[prop]['http://purl.org/commerce#currency'][0]['value'];
             var comment = data[prop]['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
             var date = data[prop]['http://purl.org/dc/terms/created'][0]['value'];
             document.IOU.IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
@@ -520,10 +520,10 @@
           var IOUs = [];
           for(var prop in data) {
             if(data.hasOwnProperty(prop)) {
-              var source = data[prop]['http://payswarm.com/vocabs/commerce#source'][0]['value'];
-              var destination = data[prop]['http://payswarm.com/vocabs/commerce#destination'][0]['value'];
-              var amount = data[prop]['http://payswarm.com/vocabs/commerce#amount'][0]['value'];
-              var currency = data[prop]['http://payswarm.com/vocabs/commerce#currency'][0]['value'];
+              var source = data[prop]['http://purl.org/commerce#source'][0]['value'];
+              var destination = data[prop]['http://purl.org/commerce#destination'][0]['value'];
+              var amount = data[prop]['http://purl.org/commerce#amount'][0]['value'];
+              var currency = data[prop]['http://purl.org/commerce#currency'][0]['value'];
               var comment = data[prop]['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
               var date = data[prop]['http://purl.org/dc/terms/created'][0]['value'];
               IOUs.push(that.createIOU(source, destination, amount, currency, comment, date));
@@ -590,10 +590,10 @@
       
       this.IOUs.forEach(function(item) {
         if (item) {
-          var source = item['http://payswarm.com/vocabs/commerce#source']['@id'];
-          var dest = item['http://payswarm.com/vocabs/commerce#destination']['@id'];
-          var amount = item['http://payswarm.com/vocabs/commerce#amount'];
-          var curr = item['http://payswarm.com/vocabs/commerce#currency'];
+          var source = item['http://purl.org/commerce#source']['@id'];
+          var dest = item['http://purl.org/commerce#destination']['@id'];
+          var amount = item['http://purl.org/commerce#amount'];
+          var curr = item['http://purl.org/commerce#currency'];
           var created = item['http://purl.org/dc/terms/created'];
           var comment = item['http://www.w3.org/2000/01/rdf-schema#comment'];
           var line = '<tr>' 
@@ -635,10 +635,10 @@
       for(var id in this.IOUs) {
         if(this.IOUs.hasOwnProperty(id)) {
           var kv = this.IOUs[id];
-          var amount = kv["http://payswarm.com/vocabs/commerce#amount"][0]['value'];
-          var curr = kv["http://payswarm.com/vocabs/commerce#currency"][0]['value'];
-          var dest = kv["http://payswarm.com/vocabs/commerce#destination"][0]['value'];
-          var source = kv["http://payswarm.com/vocabs/commerce#source"][0]['value'];
+          var amount = kv["http://purl.org/commerce#amount"][0]['value'];
+          var curr = kv["http://purl.org/commerce#currency"][0]['value'];
+          var dest = kv["http://purl.org/commerce#destination"][0]['value'];
+          var source = kv["http://purl.org/commerce#source"][0]['value'];
           var created = kv["http://purl.org/dc/terms/created"][0]['value'];
           var comment = kv['http://www.w3.org/2000/01/rdf-schema#comment'][0]['value'];
           
@@ -831,18 +831,18 @@
        
        var IOU = {
                      "@id": "",
-                     "http://payswarm.com/vocabs/commerce#source": {
+                     "http://purl.org/commerce#source": {
                          "@id": this.makeURI(source)
                       },
-                      "http://payswarm.com/vocabs/commerce#destination": {
+                      "http://purl.org/commerce#destination": {
                           "@id": this.makeURI(destination)
                       },
-                      "http://payswarm.com/vocabs/commerce#amount": amount,
-                      "http://payswarm.com/vocabs/commerce#currency": currency,
+                      "http://purl.org/commerce#amount": amount,
+                      "http://purl.org/commerce#currency": currency,
                       "http://www.w3.org/2000/01/rdf-schema#comment": comment,
                       "http://purl.org/dc/terms/created": date,
                       "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": {
-                          "@id": "http://payswarm.com/vocabs/commerce#Transfer"
+                          "@id": "http://purl.org/commerce#Transfer"
                        }
                     };
                        
@@ -850,25 +850,25 @@
         
         var legacyIOU = {};
             legacyIOU[subject] = {
-                    "http://payswarm.com/vocabs/commerce#amount" : [ {
+                    "http://purl.org/commerce#amount" : [ {
                         "value" : amount,
                         "type" : "literal"
                         }
                       
                       ],
-                    "http://payswarm.com/vocabs/commerce#currency" : [ {
+                    "http://purl.org/commerce#currency" : [ {
                         "value" : currency,
                         "type" : "literal"
                         }
                       
                       ],
-                    "http://payswarm.com/vocabs/commerce#destination" : [ {
+                    "http://purl.org/commerce#destination" : [ {
                         "value" : destination,
                         "type" : "uri"
                         }
                       
                       ],
-                    "http://payswarm.com/vocabs/commerce#source" : [ {
+                    "http://purl.org/commerce#source" : [ {
                         "value" : source,
                         "type" : "uri"
                         }
@@ -881,7 +881,7 @@
                       
                       ],
                     "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : [ {
-                        "value" : "http://payswarm.com/vocabs/commerce#Transfer",
+                        "value" : "http://purl.org/commerce#Transfer",
                         "type" : "uri"
                         }
                       
