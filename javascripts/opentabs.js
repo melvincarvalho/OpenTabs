@@ -608,6 +608,7 @@
       this.addFriend('testdummy@opentabs.net', 'Test Dummy');
       this.addCurrency('http://dbpedia.org/resource/Euro', '&euro;');
       this.addCurrency('http://dbpedia.org/resource/Bitcoin', 'bitcoin');
+      this.addCurrency('http://dbpedia.org/resource/Karma', 'karma');
       this.populateFriendsDropdown();
       this.render();
     },
