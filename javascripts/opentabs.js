@@ -180,7 +180,7 @@
         if ( user == this.user && window.localStorage[lsKey] ) ret.push(window.localStorage[lsKey]);
         ret.push(baseDir + 'private/transfers');
       }
-      ret.push(baseDir + 'public/transfers');
+      ret.push('https://' + hex_sha1(user) + '.data.fm/d/private/transfers');
       
       return ret;
     },
